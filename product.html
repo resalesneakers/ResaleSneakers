@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anunciar Produto - ResaleSneakers</title>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js"></script>
+    <!-- Scripts personalizados -->
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="auth.js"></script>
+    <script type="module" src="product.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #4ecdc4;
+            --dark: #2d3436;
+            --light: #f9f9f9;
+            --gray: #dfe6e9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .logo span {
+            color: var(--dark);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: #ff5252;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: var(--dark);
+            border: 1px solid var(--gray);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--gray);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #3bb3aa;
+        }
+        
+        .page-title {
+            text-align: center;
+            margin: 40px 0;
+            font-size: 32px;
+            color: var(--dark);
+        }
+        
+        .product-form {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+        }
+        
+        .form-section h3 {
+            margin-bottom: 15px;
+            font-size: 20px;
+            color: var(--primary);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--gray);
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .photo-upload {
+            margin-bottom: 30px;
+        }
+        
+        .photo-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .photo-box {
+            border: 2px dashed var(--gray);
+            border-radius: 5px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .photo-box:hover {
+            border-color: var(--primary);
+        }
+        
+        .photo-box.has-image {
+            border: none;
+        }
+        
+        .photo-box input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+        
+        .photo-box.has-image img {
+            display: block;
+        }
+        
+        .photo-box.has-image .add-photo-text {
+            display: none;
+        }
+        
+        .add-photo-text {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #777;
+        }
+        
+        .add-photo-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .remove-photo {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(255, 255, 255, 0.8);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .photo-box.has-image:hover .remove-photo {
+            opacity: 1;
+        }
+        
+        .option-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .option-item {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            border: 1px solid var(--gray);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option-item:hover {
+            border-color: var(--primary);
+        }
+        
+        .option-item.selected {
+            border-color: var(--primary);
+            background-color: rgba(255, 107, 107, 0.1);
+        }
+        
+        .option-item input {
+            margin-right: 10px;
+        }
+        
+        .form-action {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+            gap: 15px;
+        }
+        
+        .form-action .btn {
+            padding: 12px 30px;
+            font-size: 16px;
+        }
+        
+        .note {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .note strong {
+            color: var(--primary);
+        }
+        
+        .preview-section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .preview-title {
+            margin-bottom: 20px;
+            font-size: 20px;
+            color: var(--primary);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .product-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .preview-photos {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .preview-info {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .preview-main-photo {
+            height: 300px;
+            background-color: var(--gray);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .preview-main-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .preview-thumbnails {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        
+        .preview-thumbnail {
+            width: 70px;
+            height: 70px;
+            border-radius: 5px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .preview-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .preview-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .preview-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .preview-price {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .preview-details {
+            margin-bottom: 20px;
+        }
+        
+        .preview-details div {
+            margin-bottom: 10px;
+            display: flex;
+        }
+        
+        .preview-details span {
+            font-weight: 500;
+            min-width: 120px;
+        }
+        
+        .preview-description {
+            margin-bottom: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--gray);
+        }
+        
+        .preview-description h4 {
+            margin-bottom: 10px;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .logo {
+                margin-bottom: 15px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .option-group {
+                flex-direction: column;
+            }
+            
+            .form-action {
+                flex-direction: column;
+            }
+            
+            .photo-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">Resale<span>Sneakers</span></a>
+                
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="products.html">Explorar</a>
+                    <a href="product.html" class="active">Vender</a>
+                    <a href="products.html?type=trade">Trocar</a>
+                </div>
+                
+                <div class="user-actions">
+                    <a href="profile.html" class="btn btn-outline">Minha Conta</a>
+                    <a href="#" id="logout-btn" class="btn btn-primary">Sair</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="container">
+        <h1 class="page-title">Anunciar Calçado</h1>
+        
+        <form id="product-form" class="product-form">
+            <div class="form-section">
+                <h3>Informações Básicas</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-title">Título do Anúncio*</label>
+                        <input type="text" id="product-title" placeholder="Ex: Nike Air Jordan 1 Retro High" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-brand">Marca*</label>
+                        <select id="product-brand" required>
+                            <option value="">Selecione uma marca</option>
+                            <option value="Nike">Nike</option>
+                            <option value="Adidas">Adidas</option>
+                            <option value="Puma">Puma</option>
+                            <option value="New Balance">New Balance</option>
+                            <option value="Vans">Vans</option>
+                            <option value="Converse">Converse</option>
+                            <option value="Reebok">Reebok</option>
+                            <option value="ASICS">ASICS</option>
+                            <option value="Under Armour">Under Armour</option>
+                            <option value="Fila">Fila</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-model">Modelo</label>
+                        <input type="text" id="product-model" placeholder="Ex: Air Jordan 1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-size">Tamanho*</label>
+                        <select id="product-size" required>
+                            <option value="">Selecione um tamanho</option>
+                            <option value="34">34</option>
+                            <option value="35">35</option>
+                            <option value="36">36</option>
+                            <option value="37">37</option>
+                            <option value="38">38</option>
+                            <option value="39">39</option>
+                            <option value="40">40</option>
+                            <option value="41">41</option>
+                            <option value="42">42</option>
+                            <option value="43">43</option>
+                            <option value="44">44</option>
+                            <option value="45">45</option>
+                            <option value="46">46</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="product-description">Descrição*</label>
+                    <textarea id="product-description" placeholder="Descreva detalhes do calçado como cor, estado de conservação, detalhes de uso, embalagem, etc." required></textarea>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3>Fotos</h3>
+                <p>Adicione até 6 fotos do seu calçado. A primeira foto será a principal do anúncio.</p>
+                
+                <div class="photo-container">
+                    <div class="photo-box" id="photo-box-1">
+                        <input type="file" accept="image/*" id="photo-1" class="photo-input">
+                        <div class="add-photo-text">
+                            <div class="add-photo-icon">+</div>
+                            <span>Foto Principal</span>
+                        </div>
+                        <img src="" alt="Preview">
+                        <div class="remove-photo">✕</div>
+                    </div>
+                    
+                    <div class="photo-box" id="photo-box-2">
+                        <input type="file" accept="image/*" id="photo-2" class="photo-input">
+                        <div class="add-photo-text">
+                            <div class="add-photo-icon">+</div>
+                            <span>Adicionar</span>
+                        </div>
+                        <img src="" alt="Preview">
+                        <div class="remove-photo">✕</div>
+                    </div>
+                    
+                    <div class="photo-box" id="photo-box-3">
+                        <input type="file" accept="image/*" id="photo-3" class="photo-input">
+                        <div class="add-photo-text">
+                            <div class="add-photo-icon">+</div>
+                            <span>Adicionar</span>
+                        </div>
+                        <img src="" alt="Preview">
+                        <div class="remove-photo">✕</div>
+                    </div>
+                    
+                    <div class="photo-box" id="photo-box-4">
+                        <input type="file" accept="image/*" id="photo-4" class="photo-input">
+                        <div class="add-photo-text">
+                            <div class="add-photo-icon">+</div>
+                            <span>Adicionar</span>
+                        </div>
+                        <img src="" alt="Preview">
+                        <div class="remove-photo">✕</div>
+                    </div>
+                    
+                    <div class="photo-box" id="photo-box-5">
+                        <input type="file" accept="image/*" id="photo-5" class="photo-input">
+                        <div class="add-photo-text">
+                            <div class="add-photo-icon">+</div>
+                            <span>Adicionar</span>
+                        </div>
+                        <img src="" alt="Preview">
+                        <div class="remove-photo">✕</div>
+                    </div>
+                    
+                    <div class="photo-box" id="photo-box-6">
+                        <input type="file" accept="image/*" id="photo-6" class="photo-input">
+                        <div class="add-photo-text">
+                            <div class="add-photo-icon">+</div>
+                            <span>Adicionar</span>
+                        </div>
+                        <img src="" alt="Preview">
+                        <div class="remove-photo">✕</div>
+                    </div>
+                </div>
+                
+                <div class="note">
+                    <strong>Dica:</strong> Fotos bem iluminadas, em diferentes ângulos e mostrando detalhes do calçado aumentam as chances de venda!
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3>Tipo de Anúncio</h3>
+                
+                <div class="option-group">
+                    <div class="option-item" data-type="sale">                    <div class="option-item" data-type="sale">
+                        <input type="radio" name="ad-type" id="ad-type-sale" value="sale" required>
+                        <label for="ad-type-sale">Venda</label>
+                    </div>
+                    
+                    <div class="option-item" data-type="trade">
+                        <input type="radio" name="ad-type" id="ad-type-trade" value="trade" required>
+                        <label for="ad-type-trade">Troca</label>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="price-group">
+                    <label for="product-price">Preço (€)*</label>
+                    <input type="number" id="product-price" placeholder="Ex: 120" required>
+                </div>
+                
+                <div class="form-group" id="trade-group" style="display: none;">
+                    <label for="trade-description">O que você deseja em troca?*</label>
+                    <textarea id="trade-description" placeholder="Descreva o que você deseja em troca (ex: Air Force 1 tamanho 42)"></textarea>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3>Condição do Calçado</h3>
+                
+                <div class="option-group">
+                    <div class="option-item" data-condition="new">
+                        <input type="radio" name="condition" id="condition-new" value="new" required>
+                        <label for="condition-new">Novo</label>
+                    </div>
+                    
+                    <div class="option-item" data-condition="used">
+                        <input type="radio" name="condition" id="condition-used" value="used" required>
+                        <label for="condition-used">Usado</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3>Localização</h3>
+                
+                <div class="form-group">
+                    <label for="product-location">Cidade*</label>
+                    <input type="text" id="product-location" placeholder="Ex: Lisboa, Porto, etc." required>
+                </div>
+            </div>
+            
+            <div class="form-action">
+                <button type="submit" class="btn btn-primary">Publicar Anúncio</button>
+                <button type="button" class="btn btn-outline" id="preview-btn">Pré-visualizar</button>
+            </div>
+        </form>
+        
+        <!-- Pré-visualização do Anúncio -->
+        <div class="preview-section" id="preview-section" style="display: none;">
+            <h3 class="preview-title">Pré-visualização do Anúncio</h3>
+            
+            <div class="product-preview">
+                <div class="preview-photos">
+                    <div class="preview-main-photo" id="preview-main-photo">
+                        <img src="" alt="Foto Principal">
+                    </div>
+                    
+                    <div class="preview-thumbnails" id="preview-thumbnails">
+                        <!-- Miniaturas das fotos serão adicionadas aqui -->
+                    </div>
+                </div>
+                
+                <div class="preview-info">
+                    <div class="preview-status" id="preview-status">Novo</div>
+                    <h2 class="preview-title" id="preview-product-title">Título do Anúncio</h2>
+                    <div class="preview-price" id="preview-price">€120</div>
+                    
+                    <div class="preview-details">
+                        <div>
+                            <span>Marca:</span>
+                            <span id="preview-brand">Nike</span>
+                        </div>
+                        <div>
+                            <span>Modelo:</span>
+                            <span id="preview-model">Air Jordan 1</span>
+                        </div>
+                        <div>
+                            <span>Tamanho:</span>
+                            <span id="preview-size">42</span>
+                        </div>
+                        <div>
+                            <span>Localização:</span>
+                            <span id="preview-location">Lisboa</span>
+                        </div>
+                    </div>
+                    
+                    <div class="preview-description">
+                        <h4>Descrição</h4>
+                        <p id="preview-description">Descrição do calçado.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { auth, db, storage } from './firebase.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
+        import { addDoc, collection } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+        import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js";
+
+        // Verificar se o usuário está autenticado
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "login.html"; // Redirecionar para login se não estiver autenticado
+            }
+        });
+
+        // Alternar entre venda e troca
+        const adTypeSale = document.getElementById('ad-type-sale');
+        const adTypeTrade = document.getElementById('ad-type-trade');
+        const priceGroup = document.getElementById('price-group');
+        const tradeGroup = document.getElementById('trade-group');
+
+        adTypeSale.addEventListener('change', () => {
+            priceGroup.style.display = 'block';
+            tradeGroup.style.display = 'none';
+        });
+
+        adTypeTrade.addEventListener('change', () => {
+            priceGroup.style.display = 'none';
+            tradeGroup.style.display = 'block';
+        });
+
+        // Upload de fotos
+        const photoBoxes = document.querySelectorAll('.photo-box');
+        const photoInputs = document.querySelectorAll('.photo-input');
+        const previewMainPhoto = document.getElementById('preview-main-photo');
+        const previewThumbnails = document.getElementById('preview-thumbnails');
+
+        photoBoxes.forEach((box, index) => {
+            const input = box.querySelector('.photo-input');
+            const img = box.querySelector('img');
+            const removeBtn = box.querySelector('.remove-photo');
+
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        img.src = event.target.result;
+                        box.classList.add('has-image');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                input.value = '';
+                img.src = '';
+                box.classList.remove('has-image');
+            });
+        });
+
+        // Pré-visualização do anúncio
+        const previewBtn = document.getElementById('preview-btn');
+        const previewSection = document.getElementById('preview-section');
+
+        previewBtn.addEventListener('click', () => {
+            const title = document.getElementById('product-title').value;
+            const brand = document.getElementById('product-brand').value;
+            const model = document.getElementById('product-model').value;
+            const size = document.getElementById('product-size').value;
+            const description = document.getElementById('product-description').value;
+            const location = document.getElementById('product-location').value;
+            const condition = document.querySelector('input[name="condition"]:checked').value;
+            const price = document.getElementById('product-price').value;
+            const tradeDescription = document.getElementById('trade-description').value;
+
+            // Atualizar a pré-visualização
+            document.getElementById('preview-product-title').textContent = title;
+            document.getElementById('preview-brand').textContent = brand;
+            document.getElementById('preview-model').textContent = model;
+            document.getElementById('preview-size').textContent = size;
+            document.getElementById('preview-description').textContent = description;
+            document.getElementById('preview-location').textContent = location;
+            document.getElementById('preview-status').textContent = condition === 'new' ? 'Novo' : 'Usado';
+            document.getElementById('preview-price').textContent = adTypeSale.checked ? `€${price}` : 'Troca';
+
+            // Atualizar fotos
+            const mainPhoto = photoBoxes[0].querySelector('img').src;
+            previewMainPhoto.querySelector('img').src = mainPhoto;
+
+            previewThumbnails.innerHTML = '';
+            photoBoxes.forEach((box, index) => {
+                const imgSrc = box.querySelector('img').src;
+                if (imgSrc) {
+                    const thumbnail = document.createElement('div');
+                    thumbnail.className = 'preview-thumbnail';
+                    thumbnail.innerHTML = `<img src="${imgSrc}" alt="Foto ${index + 1}">`;
+                    previewThumbnails.appendChild(thumbnail);
+                }
+            });
+
+            previewSection.style.display = 'block';
+        });
+
+        // Enviar anúncio
+        const productForm = document.getElementById('product-form');
+
+        productForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const user = auth.currentUser;
+            if (!user) {
+                alert('Por favor, inicie sessão para publicar um anúncio.');
+                return;
+            }
+
+            const title = document.getElementById('product-title').value;
+            const brand = document.getElementById('product-brand').value;
+            const model = document.getElementById('product-model').value;
+            const size = document.getElementById('product-size').value;
+            const description = document.getElementById('product-description').value;
+            const location = document.getElementById('product-location').value;
+            const condition = document.querySelector('input[name="condition"]:checked').value;
+            const adType = document.querySelector('input[name="ad-type"]:checked').value;
+            const price = adType === 'sale' ? document.getElementById('product-price').value : null;
+            const tradeDescription = adType === 'trade' ? document.getElementById('trade-description').value : null;
+
+            // Upload das fotos
+            const photos = [];
+            for (let i = 0; i < photoInputs.length; i++) {
+                const file = photoInputs[i].files[0];
+                if (file) {
+                    const storageRef = ref(storage, `products/${user.uid}/${Date.now()}_${file.name}`);
+                    await uploadBytes(storageRef, file);
+                    const photoURL = await getDownloadURL(storageRef);
+                    photos.push(photoURL);
+                }
+            }
+
+            // Salvar no Firestore
+            const productData = {
+                title,
+                brand,
+                model,
+                size,
+                description,
+                location,
+                condition,
+                adType,
+                price,
+                tradeDescription,
+                photos,
+                userId: user.uid,
+                createdAt: new Date(),
+            };
+
+            try {
+                await addDoc(collection(db, 'products'), productData);
+                alert('Anúncio publicado com sucesso!');
+                window.location.href = 'profile.html';
+            } catch (error) {
+                console.error('Erro ao publicar anúncio:', error);
+                alert('Erro ao publicar anúncio. Tente novamente.');
+            }
+        });
+    </script>
+</body>
+</html>

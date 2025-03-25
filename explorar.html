@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResaleSneakers - Explorar Calçados</title>
+    <!-- Firebase App (core) -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js"></script>
+    <!-- Firestore (banco de dados) -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js"></script>
+    <!-- Firebase Storage -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js"></script>
+    <!-- Seus scripts personalizados -->
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="auth.js"></script>
+    <script type="module" src="products.js"></script>
+    <script type="module" src="explore.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Variáveis CSS */
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #4ecdc4;
+            --dark: #2d3436;
+            --light: #f9f9f9;
+            --gray: #dfe6e9;
+        }
+        
+        /* Estilos Gerais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .logo span {
+            color: var(--dark);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .search-bar {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+            position: relative;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--gray);
+            border-radius: 30px;
+            font-size: 14px;
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: #ff5252;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: var(--dark);
+            border: 1px solid var(--gray);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--gray);
+        }
+        
+        /* Filtros */
+        .filters {
+            background-color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .filter-group select, .filter-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--gray);
+            border-radius: 5px;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* Ordenação */
+        .sort-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .sort-options select {
+            padding: 8px 15px;
+            border: 1px solid var(--gray);
+            border-radius: 5px;
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .view-toggle button {
+            background: none;
+            border: 1px solid var(--gray);
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .view-toggle button.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Produtos */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        
+        .product-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .product-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-img {
+            height: 200px;
+            background-color: var(--gray);
+            position: relative;
+        }
+        
+        .product-status {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-new {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .status-used {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .status-trade {
+            background-color: #a29bfe;
+            color: white;
+        }
+        
+        .product-info {
+            padding: 15px;
+        }
+        
+        .product-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .product-price {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .chat-now {
+            display: inline-block;
+            width: 100%;
+            padding: 8px 0;
+            background-color: var(--secondary);
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-now:hover {
+            background-color: #3bb3aa;
+        }
+        
+        /* Produtos na vista de lista */
+        .list-item {
+            display: flex;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .list-img {
+            width: 200px;
+            min-width: 200px;
+            background-color: var(--gray);
+            position: relative;
+        }
+        
+        .list-info {
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .list-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .list-title-price {
+            flex: 1;
+        }
+        
+        .list-actions {
+            width: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0 15px;
+        }
+        
+        /* Paginação */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 40px 0;
+            gap: 10px;
+        }
+        
+        .pagination button {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--gray);
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination button.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .pagination button:hover:not(.active) {
+            background-color: var(--gray);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 60px 0 20px;
+            margin-top: 60px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-column h3 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+        }
+        
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .search-bar {
+                max-width: none;
+                margin: 15px 0;
+            }
+            
+            nav {
+                flex-direction: column;
+            }
+            
+            .nav-links {
+                margin: 15px 0;
+            }
+            
+            .list-item {
+                flex-direction: column;
+            }
+            
+            .list-img {
+                width: 100%;
+                height: 200px;
+            }
+            
+            .list-actions {
+                width: 100%;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="resaleSneakers.html" class="logo">Resale<span>Sneakers</span></a>
+                
+                <div class="search-bar">
+                    <input type="text" placeholder="Encontre o sneaker dos seus sonhos..." id="searchInput">
+                </div>
+                
+                <div class="nav-links">
+                    <a href="resaleSneakers.html">Home</a>
+                    <a href="explorar.html" class="active">Explorar</a>
+                    <a href="vender.html">Vender</a>
+                    <a href="trocar.html">Trocar</a>
+                </div>
+                
+                <div class="user-actions" id="userActions">
+                    <a href="login.html" class="btn btn-outline">Entrar</a>
+                    <a href="registar.html" class="btn btn-primary">Cadastrar</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="container">
+        <h1 style="margin: 30px 0 20px;">Explorar Calçados</h1>
+        
+        <!-- Filtros -->
+        <div class="filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="brand">Marca</label>
+                    <select id="brand">
+                        <option value="">Todas as marcas</option>
+                        <option value="nike">Nike</option>
+                        <option value="adidas">Adidas</option>
+                        <option value="puma">Puma</option>
+                        <option value="new-balance">New Balance</option>
+                        <option value="vans">Vans</option>
+                        <option value="converse">Converse</option>
+                        <option value="asics">Asics</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="size">Tamanho</label>
+                    <select id="size">
+                        <option value="">Todos os tamanhos</option>
+                        <option value="36">36</option>
+                        <option value="37">37</option>
+                        <option value="38">38</option>
+                        <option value="39">39</option>
+                        <option value="40">40</option>
+                        <option value="41">41</option>
+                        <option value="42">42</option>
+                        <option value="43">43</option>
+                        <option value="44">44</option>
+                        <option value="45">45</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="condition">Estado</label>
+                    <select id="condition">
+                        <option value="">Todos</option>
+                        <option value="new">Novo</option>
+                        <option value="used">Usado</option>
+                        <option value="trade">Para troca</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="price-min">Preço Mínimo</label>
+                    <input type="number" id="price-min" placeholder="€0">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="price-max">Preço Máximo</label>
+                    <input type="number" id="price-max" placeholder="€5000">
+                </div>
+            </div>
+            
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="location">Localização</label>
+                    <select id="location">
+                        <option value="">Todo o país</option>
+                        <option value="lisboa">Lisboa</option>
+                        <option value="porto">Porto</option>
+                        <option value="braga">Braga</option>
+                        <option value="coimbra">Coimbra</option>
+                        <option value="faro">Faro</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="color">Cor</label>
+                    <select id="color">
+                        <option value="">Todas as cores</option>
+                        <option value="black">Preto</option>
+                        <option value="white">Branco</option>
+                        <option value="red">Vermelho</option>
+                        <option value="blue">Azul</option>
+                        <option value="green">Verde</option>
+                        <option value="multicolor">Multicolor</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="style">Estilo</label>
+                    <select id="style">
+                        <option value="">Todos os estilos</option>
+                        <option value="casual">Casual</option>
+                        <option value="running">Running</option>
+                        <option value="basketball">Basquetebol</option>
+                        <option value="skateboarding">Skateboarding</option>
+                        <option value="lifestyle">Lifestyle</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="filter-buttons">
+                <button class="btn btn-outline" id="resetFilters">Limpar Filtros</button>
+                <button class="btn btn-primary" id="applyFilters">Aplicar Filtros</button>
+            </div>
+        </div>
+        
+        <!-- Ordenação e Vista -->
+        <div class="sort-options">
+            <div>
+                <label for="sort">Ordenar por: </label>
+                <select id="sort">
+                    <option value="newest">Mais recentes</option>
+                    <option value="priceAsc">Preço: menor para maior</option>
+                    <option value="priceDesc">Preço: maior para menor</option>
+                    <option value="popular">Mais populares</option>
+                </select>
+            </div>
+            
+            <div class="view-toggle">
+                <button id="gridView" class="active">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M1 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V2zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V2zM1 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V7zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V7zM1 12a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-2zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-2zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-2z"/>
+                    </svg>
+                </button>
+                <button id="listView">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Produtos (Vista em Grid por padrão) -->
+        <div class="product-container">
+            <div class="product-grid" id="productContainer">
+                <!-- Produtos serão carregados dinamicamente via JavaScript -->
+                <!-- Exemplos -->
+                <div class="product-card">
+                    <div class="product-img">
+                        <span class="product-status status-used">USADO</span>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Nike Air Jordan 1 Retro High</h3>
+                        <p class="product-price">€200</p>
+                        <div class="product-meta">
+                            <span>Tamanho: 42</span>
+                            <span>Lisboa</span>
+                        </div>
+                        <a href="#" class="chat-now">Conversar com vendedor</a>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-img">
+                        <span class="product-status status-new">NOVO</span>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Adidas Yeezy Boost 350 V2</h3>
+                        <p class="product-price">€300</p>
+                        <div class="product-meta">
+                            <span>Tamanho: 41</span>
+                            <span>Porto</span>
+                        </div>
+                        <a href="#" class="chat-now">Conversar com vendedor</a>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-img">
+                        <span class="product-status status-trade">TROCA</span>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">New Balance 550</h3>
+                        <p class="product-price">Troca por Air Force 1</p>
+                        <div class="product-meta">
+                            <span>Tamanho: 39</span>
+                            <span>Braga</span>
+                        </div>
+                        <a href="#" class="chat-now">Propor troca</a>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-img">
+                        <span class="product-status status-used">USADO</span>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Vans Old Skool</h3>
+                        <p class="product-price">€80</p>
+                        <div class="product-meta">
+                            <span>Tamanho: 40</span>
+                            <span>Coimbra</span>
+                        </div>
+                        <a href="#" class="chat-now">Conversar com vendedor</a>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-img">
+                        <span class="product-status status-new">NOVO</span>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Nike Air Force 1 Low</h3>
+                        <p class="product-price">€120</p>
+                        <div class="product-meta">
+                            <span>Tamanho: 43</span>
+                            <span>Faro</span>
+                        </div>
+                        <a href="#" class="chat-now">Conversar com vendedor</a>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-img">
+                        <span class="product-status status-used">USADO</span>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Converse Chuck Taylor All Star</h3>
+                        <p class="product-price">€60</p>
+                        <div class="product-meta">
+                            <span>Tamanho: 38</span>
+                            <span>Lisboa</span>
+                        </div>
+                        <a href="#" class="chat-now">Conversar com vendedor</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Paginação -->
+        <div class="pagination">
+            <button>&laquo;</button>
+            <button class="active">1</button>
+            <button>2</button>
+            <button>3</button>
+            <button>4</button>
+            <button>5</button>
+            <button>&raquo;</button>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>ResaleSneakers</h3>
+                    <ul class="footer-links">
+                        <li><a href="sobre.html">Sobre Nós</a></li>
+                        <li><a href="como-funciona.html">Como Funciona</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                        <li><a href="carreiras.html">Carreiras</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Ajuda</h3>
+                    <ul class="footer-links">
+                        <li><a href="faq.html">Perguntas Frequentes</a></li>
+                        <li><a href="contacto.html">Contacte-nos</a></li>
+                        <li><a href="privacidade.html">Política de Privacidade</a></li>
+                        <li><a href="termos.html">Termos de Uso</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Conta</h3>
+                    <ul class="footer-links">
+                        <li><a href="perfil.html">Meu Perfil</a></li>
+                        <li><a href="meusanuncios.html">Meus Anúncios</a></li>
+                        <li><a href="favoritos.html">Favoritos</a></li>
+                        <li><a href="mensagens.html">Mensagens</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Siga-nos</h3>
+                    <div class="social-links">
+                        <a href="#" class="social-icon">FB</a>
+                        <a href="#" class="social-icon">IG</a>
+                        <a href="#" class="social-icon">TW</a>
+                        <a href="#" class="social-icon">YT</a>
+                    </div>
+                    <p style="margin-top: 20px;">Subscreva a nossa newsletter para receber novidades e promoções.</p>
+                    <div style="display: flex; margin-top: 10px;">
+                        <input type="email" placeholder="Seu email" style="flex: 1; padding: 10px; border: none; border-radius: 5px 0 0 5px;">
+                        <button style="background-color: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 0 5px 5px 0; cursor: pointer;">Enviar</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                &copy; 2025 ResaleSneakers. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Alternar entre as vistas de grid e lista
+        document.getElementById('gridView').addEventListener('click', function() {
+            document.getElementById('productContainer').className = 'product-grid';
+            document.getElementById('gridView').classList.add('active');
+            document.getElementById('listView').classList.remove('active');
+        });
+        
+        document.getElementById('listView').addEventListener('click', function() {
+            document.getElementById('productContainer').className = 'product-list';
+            document.getElementById('listView').classList.add('active');
+            document.getElementById('gridView').classList.remove('active');
+            
+            // Convertendo os cards para o formato de lista
+            const container = document.getElementById('productContainer');
+            const cards = container.querySelectorAll('.product-card');
+            
+    cards.forEach(card => {
+        // Armazenar o conteúdo original
+        const imgElement = card.querySelector('.product-img').cloneNode(true);
+        const infoElement = card.querySelector('.product-info').cloneNode(true);
+        
+        // Limpar o card
+        card.innerHTML = '';
+        card.classList.add('list-item');
+        
+        // Adicionar classe para imagem na visão lista
+        imgElement.classList.add('list-img');
+        imgElement.classList.remove('product-img');
+        
+        // Adicionar classe para informações na visão lista
+        infoElement.classList.add('list-info');
+        infoElement.classList.remove('product-info');
+        
+        // Restruturar elementos para o formato de lista
+        const listActions = document.createElement('div');
+        listActions.className = 'list-actions';
+        
+        // Mover o botão de chat para a seção de ações
+        const chatButton = infoElement.querySelector('.chat-now');
+        listActions.appendChild(chatButton);
+        
+        // Organizar os elementos na visão lista
+        card.appendChild(imgElement);
+        card.appendChild(infoElement);
+        card.appendChild(listActions);
+    });
+});
+
+// Limpar filtros
+document.getElementById('resetFilters').addEventListener('click', function() {
+    document.querySelectorAll('select').forEach(select => {
+        select.selectedIndex = 0;
+    });
+    
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+        input.value = '';
+    });
+});
+
+// Aplicar filtros (simulação)
+document.getElementById('applyFilters').addEventListener('click', function() {
+    alert('Filtros aplicados! Na implementação real, esta função buscaria produtos do banco de dados.');
+});
+</script>
+</body>
+</html>

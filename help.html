@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajuda - ResaleSneakers</title>
+    <!-- Firebase App (core) -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js"></script>
+    <!-- Firestore (banco de dados) -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js"></script>
+    <!-- Seus scripts personalizados -->
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="auth.js"></script>
+    <script type="module" src="help.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">Resale<span>Sneakers</span></div>
+                
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="products.html">Explorar</a>
+                    <a href="product.html">Vender</a>
+                    <a href="products.html?mode=trade">Trocar</a>
+                    <a href="help.html" class="active">Ajuda</a>
+                </div>
+                
+                <div class="user-actions" id="userActions">
+                    <!-- Preenchido dinamicamente pelo auth.js -->
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Centro de Ajuda</h1>
+            <p>Encontre respostas para as suas dúvidas mais frequentes</p>
+        </div>
+    </section>
+    
+    <!-- Main Content -->
+    <section class="help-content">
+        <div class="container">
+            <div class="help-grid">
+                <!-- Menu de navegação lateral -->
+                <div class="help-nav">
+                    <h3>Tópicos</h3>
+                    <ul>
+                        <li><a href="#getting-started" class="active">Primeiros Passos</a></li>
+                        <li><a href="#account">Conta e Perfil</a></li>
+                        <li><a href="#selling">Vender Calçados</a></li>
+                        <li><a href="#buying">Comprar Calçados</a></li>
+                        <li><a href="#trading">Trocar Calçados</a></li>
+                        <li><a href="#chat">Chat e Negociação</a></li>
+                        <li><a href="#shipping">Envio e Entrega</a></li>
+                        <li><a href="#payment">Pagamentos</a></li>
+                        <li><a href="#safety">Segurança</a></li>
+                        <li><a href="#contact">Contactar-nos</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Conteúdo principal -->
+                <div class="help-main">
+                    <div class="search-help">
+                        <input type="text" placeholder="Pesquisar na ajuda...">
+                        <button class="search-btn">Pesquisar</button>
+                    </div>
+                    
+                    <!-- Primeiros Passos -->
+                    <div class="help-section" id="getting-started">
+                        <h2>Primeiros Passos</h2>
+                        
+                        <div class="faq-item">
+                            <h3>Como criar uma conta no ResaleSneakers?</h3>
+                            <div class="faq-answer">
+                                <p>Para criar uma conta no ResaleSneakers:</p>
+                                <ol>
+                                    <li>Clique no botão "Cadastrar" no canto superior direito da página.</li>
+                                    <li>Preencha o formulário com seu email, senha e informações básicas.</li>
+                                    <li>Verifique seu email para confirmar a conta.</li>
+                                    <li>Complete seu perfil com mais informações para aumentar sua credibilidade.</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class="faq-item">
+                            <h3>Como navegar na plataforma?</h3>
+                            <div class="faq-answer">
+                                <p>A navegação no ResaleSneakers é simples:</p>
+                                <ul>
+                                    <li><strong>Home:</strong> Página inicial com destaques e novidades.</li>
+                                    <li><strong>Explorar:</strong> Encontre todos os calçados disponíveis para compra.</li>
+                                    <li><strong>Vender:</strong> Anuncie seus calçados para venda.</li>
+                                    <li><strong>Trocar:</strong> Veja calçados disponíveis para troca ou ofereça os seus.</li>
+                                    <li><strong>Perfil:</strong> Gerencie suas informações e veja seus anúncios.</li>
+                                    <li><strong>Chat:</strong> Comunique-se com outros utilizadores.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Conta e Perfil -->
+                    <div class="help-section" id="account">
+                        <h2>Conta e Perfil</h2>
+                        
+                        <div class="faq-item">
+                            <h3>Como editar minhas informações de perfil?</h3>
+                            <div class="faq-answer">
+                                <p>Para editar seu perfil:</p>
+                                <ol>
+                                    <li>Faça login na sua conta.</li>
+                                    <li>Clique no seu nome ou foto no canto superior direito.</li>
+                                    <li>Selecione "Perfil" no menu suspenso.</li>
+                                    <li>Clique em "Editar Perfil" para alterar suas informações.</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class="faq-item">
+                            <h3>Como recuperar minha senha?</h3>
+                            <div class="faq-answer">
+                                <p>Se esqueceu sua senha:</p>
+                                <ol>
+                                    <li>Clique em "Entrar" no canto superior direito.</li>
+                                    <li>Clique em "Esqueci minha senha".</li>
+                                    <li>Insira o email associado à sua conta.</li>
+                                    <li>Siga as instruções enviadas ao seu email para redefinir sua senha.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vender Calçados -->
+                    <div class="help-section" id="selling">
+                        <h2>Vender Calçados</h2>
+                        
+                        <div class="faq-item">
+                            <h3>Como criar um anúncio de venda?</h3>
+                            <div class="faq-answer">
+                                <p>Para criar um anúncio de venda:</p>
+                                <ol>
+                                    <li>Faça login na sua conta.</li>
+                                    <li>Clique em "Vender" no menu superior.</li>
+                                    <li>Preencha o formulário com informações detalhadas sobre o calçado.</li>
+                                    <li>Adicione fotos de alta qualidade (recomendamos pelo menos 5 fotos).</li>
+                                    <li>Defina o preço e as condições de venda.</li>
+                                    <li>Clique em "Publicar Anúncio".</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class="faq-item">
+                            <h3>Que fotos devo tirar dos meus calçados?</h3>
+                            <div class="faq-answer">
+                                <p>Recomendamos tirar as seguintes fotos:</p>
+                                <ul>
+                                    <li>Vista lateral externa e interna dos calçados</li>
+                                    <li>Vista frontal e traseira</li>
+                                    <li>Sola e interior</li>
+                                    <li>Detalhes da marca, logo e etiquetas</li>
+                                    <li>Detalhes de qualquer desgaste ou defeito</li>
+                                    <li>Caixa original e acessórios (se disponíveis)</li>
+                                </ul>
+                                <p>Use boa iluminação e um fundo neutro para destacar os calçados.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Demais seções omitidas para brevidade -->
+                    
+                    <!-- Contact Us Section -->
+                    <div class="help-section" id="contact">
+                        <h2>Contactar-nos</h2>
+                        
+                        <div class="contact-form">
+                            <p>Não encontrou o que procurava? Envie-nos uma mensagem e responderemos o mais rapidamente possível.</p>
+                            
+                            <form id="contactForm">
+                                <div class="form-group">
+                                    <label for="name">Nome</label>
+                                    <input type="text" id="name" name="name" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" name="email" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="subject">Assunto</label>
+                                    <select id="subject" name="subject" required>
+                                        <option value="">Selecione um assunto</option>
+                                        <option value="account">Problemas com a conta</option>
+                                        <option value="listing">Problemas com anúncios</option>
+                                        <option value="transaction">Problemas com transações</option>
+                                        <option value="general">Dúvidas gerais</option>
+                                        <option value="other">Outro</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="message">Mensagem</label>
+                                    <textarea id="message" name="message" rows="5" required></textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Enviar Mensagem</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>ResaleSneakers</h3>
+                    <p>A sua plataforma para venda e troca de calçados de forma simples e direta.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Explorar</h3>
+                    <ul class="footer-links">
+                        <li><a href="products.html">Todos os Calçados</a></li>
+                        <li><a href="products.html?condition=new">Novos</a></li>
+                        <li><a href="products.html?condition=used">Usados</a></li>
+                        <li><a href="products.html?mode=trade">Disponíveis para Troca</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Suporte</h3>
+                    <ul class="footer-links">
+                        <li><a href="help.html">Centro de Ajuda</a></li>
+                        <li><a href="help.html#contact">Contactar Suporte</a></li>
+                        <li><a href="help.html#safety">Dicas de Segurança</a></li>
+                        <li><a href="terms.html">Termos e Condições</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contacto</h3>
+                    <ul class="footer-links">
+                        <li>Email: suporte@resalesneakers.com</li>
+                        <li>Telefone: +351 210 123 456</li>
+                        <li>
+                            <div class="social-links">
+                                <a href="#" class="social-icon">FB</a>
+                                <a href="#" class="social-icon">IG</a>
+                                <a href="#" class="social-icon">TW</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                &copy; 2025 ResaleSneakers. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

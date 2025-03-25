@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termos e Condições - ResaleSneakers</title>
+    <!-- Firebase App (core) -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js"></script>
+    
+    <style>
+        /* Reset e variáveis */
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #4ECDC4;
+            --dark-color: #343A40;
+            --light-color: #F8F9FA;
+            --gray-color: #6C757D;
+            --border-color: #DEE2E6;
+            --font-main: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Tipografia */
+        h1, h2, h3, h4 {
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: #e04c4c;
+        }
+
+        ul {
+            list-style-position: inside;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Header */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+
+        .logo span {
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: var(--dark-color);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #e04c4c;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Page Header */
+        .page-header {
+            background-color: #f8f9fa;
+            padding: 2.5rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Terms Content */
+        .terms-content {
+            padding: 3rem 0;
+        }
+
+        .terms-content .container {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 2rem;
+        }
+
+        /* Navigation Sidebar */
+        .terms-nav {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 90px;
+            height: max-content;
+        }
+
+        .terms-nav ul {
+            list-style-type: none;
+        }
+
+        .terms-nav li {
+            padding: 0.4rem 0;
+        }
+
+        .terms-nav a {
+            display: block;
+            padding: 0.3rem 0;
+            color: var(--dark-color);
+            transition: transform 0.2s;
+        }
+
+        .terms-nav a:hover {
+            transform: translateX(5px);
+            color: var(--primary-color);
+        }
+
+        /* Main Content */
+        .terms-text {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .terms-section {
+            margin-bottom: 2.5rem;
+            scroll-margin-top: 100px;
+        }
+
+        .terms-section ul {
+            padding-left: 1rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 3rem 0 1rem;
+            margin-top: 2rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            color: white;
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -10px;
+            width: 50px;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        .footer-section ul {
+            list-style-type: none;
+        }
+
+        .footer-section a {
+            color: #CCC;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .terms-content .container {
+                grid-template-columns: 1fr;
+            }
+
+            .terms-nav {
+                position: static;
+                margin-bottom: 2rem;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                width: 100%;
+                justify-content: space-between;
+                margin: 1rem 0;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .nav-links {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: center;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">Resale<span>Sneakers</span></div>
+                
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="products.html">Explorar</a>
+                    <a href="product.html">Vender</a>
+                    <a href="products.html?mode=trade">Trocar</a>
+                    <a href="help.html">Ajuda</a>
+                </div>
+                
+                <div class="user-actions" id="userActions">
+                    <a href="login.html" class="btn btn-outline">Entrar</a>
+                    <a href="register.html" class="btn btn-primary">Registrar</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Header da Página -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Termos e Condições</h1>
+            <p>Última atualização: 15 de Março de 2025</p>
+        </div>
+    </section>
+    
+    <!-- Conteúdo Principal -->
+    <section class="terms-content">
+        <div class="container">
+            <div class="terms-nav">
+                <h3>Índice</h3>
+                <ul>
+                    <li><a href="#introduction">Introdução</a></li>
+                    <li><a href="#definitions">Definições</a></li>
+                    <li><a href="#account">Conta de Utilizador</a></li>
+                    <li><a href="#marketplace">Regras do Mercado</a></li>
+                    <li><a href="#listings">Anúncios e Produtos</a></li>
+                    <li><a href="#transactions">Transações</a></li>
+                    <li><a href="#prohibited">Itens Proibidos</a></li>
+                    <li><a href="#disputes">Resolução de Disputas</a></li>
+                    <li><a href="#limitations">Limitações de Responsabilidade</a></li>
+                    <li><a href="#privacy">Privacidade</a></li>
+                    <li><a href="#termination">Encerramento de Conta</a></li>
+                    <li><a href="#changes">Alterações aos Termos</a></li>
+                    <li><a href="#contact">Contacto</a></li>
+                </ul>
+            </div>
+            
+            <div class="terms-text">
+                <section id="introduction" class="terms-section">
+                    <h2>1. Introdução</h2>
+                    <p>Bem-vindo ao ResaleSneakers ("nós", "nosso", "plataforma"). Ao utilizar os nossos serviços, você concorda com estes Termos e Condições ("Termos"). Por favor, leia-os cuidadosamente.</p>
+                    <p>A ResaleSneakers é uma plataforma que permite a utilizadores anunciar, vender, comprar e trocar calçados entre si. Atuamos como intermediários para facilitar as transações, mas não somos parte nas transações entre utilizadores.</p>
+                    <p>Se não concorda com estes Termos, por favor, não utilize os nossos serviços.</p>
+                </section>
+                
+                <section id="definitions" class="terms-section">
+                    <h2>2. Definições</h2>
+                    <p>Para efeitos destes Termos:</p>
+                    <ul>
+                        <li><strong>"Plataforma"</strong> refere-se ao website, aplicações móveis e serviços da ResaleSneakers.</li>
+                        <li><strong>"Utilizador"</strong> refere-se a qualquer pessoa que aceda ou utilize a Plataforma.</li>
+                        <li><strong>"Vendedor"</strong> refere-se a um Utilizador que anuncia calçados para venda ou troca.</li>
+                        <li><strong>"Comprador"</strong> refere-se a um Utilizador que adquire ou troca calçados anunciados na Plataforma.</li>
+                        <li><strong>"Conteúdo"</strong> refere-se a textos, imagens, vídeos e outros materiais publicados na Plataforma.</li>
+                        <li><strong>"Anúncio"</strong> refere-se a uma listagem criada por um Vendedor para vender ou trocar calçados.</li>
+                    </ul>
+                </section>
+                
+                <section id="account" class="terms-section">
+                    <h2>3. Conta de Utilizador</h2>
+                    
+                    <h3>3.1 Registo</h3>
+                    <p>Para utilizar a totalidade dos nossos serviços, deverá criar uma conta. Durante o registo, deve fornecer informações precisas, completas e atualizadas. É responsável por manter a confidencialidade da sua senha e conta.</p>
+                    
+                    <h3>3.2 Requisitos de Idade</h3>
+                    <p>Deve ter pelo menos 18 anos para criar uma conta. Se tiver entre 16 e 18 anos, pode utilizar a Plataforma apenas com supervisão e consentimento dos pais ou tutores legais.</p>
+                    
+                    <h3>3.3 Responsabilidade da Conta</h3>
+                    <p>É inteiramente responsável por todas as atividades que ocorram na sua conta. Deverá notificar-nos imediatamente de qualquer uso não autorizado da sua conta ou qualquer outra violação de segurança.</p>
+                    
+                    <h3>3.4 Verificação de Identidade</h3>
+                    <p>Podemos, a nosso critério, solicitar documentos para verificar a sua identidade. A falta de fornecimento destes documentos pode resultar na suspensão ou encerramento da sua conta.</p>
+                </section>
+                
+                <section id="marketplace" class="terms-section">
+                    <h2>4. Regras do Mercado</h2>
+                    
+                    <h3>4.1 Princípios Gerais</h3>
+                    <p>A ResaleSneakers destina-se a ser uma plataforma segura e confiável. Como tal, esperamos que todos os Utilizadores atuem com boa-fé, honestidade e respeito pelos outros.</p>
+                    
+                    <h3>4.2 Taxas e Comissões</h3>
+                    <p>A publicação de anúncios é gratuita. No entanto, cobramos uma comissão de 8% sobre o valor final de cada venda concluída com sucesso. As taxas estão sujeitas a alterações, e serão sempre comunicadas antecipadamente.</p>
+                    
+                    <h3>4.3 Avaliações</h3>
+                    <p>Após cada transação, os Utilizadores podem avaliar-se mutuamente. As avaliações devem ser honestas e baseadas na experiência real. Avaliações falsas ou maliciosas podem resultar em ação disciplinar.</p>
+                </section>
+                
+                <section id="listings" class="terms-section">
+                    <h2>5. Anúncios e Produtos</h2>
+                    
+                    <h3>5.1 Criação de Anúncios</h3>
+                    <p>Ao criar um anúncio, deve fornecer descrições precisas e detalhadas dos calçados, incluindo quaisquer defeitos ou sinais de uso. Todas as imagens devem ser dos produtos reais que está a vender.</p>
+                    
+                    <h3>5.2 Preços</h3>
+                    <p>Os preços devem ser razoáveis e expressos na moeda local (EUR). Pode oferecer opções de negociação ou preço fixo conforme preferir.</p>
+                    
+                    <h3>5.3 Autenticidade</h3>
+                    <p>Apenas calçados autênticos podem ser vendidos na plataforma. A venda de contrafações é estritamente proibida e resultará em sanções, incluindo possível encerramento permanente da conta.</p>
+                    
+                    <h3>5.4 Trocar</h3>
+                    <p>As trocas são permitidas na nossa plataforma. Ambas as partes devem concordar com os termos da troca antes de prosseguir. A ResaleSneakers não assume responsabilidade pelo valor percebido dos itens trocados.</p>
+                </section>
+                
+                <section id="transactions" class="terms-section">
+                    <h2>6. Transações</h2>
+                    
+                    <h3>6.1 Processo de Compra</h3>
+                    <p>Todas as transações devem ser realizadas através da nossa plataforma. Tentativas de circundar o sistema de pagamento da plataforma podem resultar em sanções.</p>
+                    
+                    <h3>6.2 Pagamentos</h3>
+                    <p>Aceitamos vários métodos de pagamento, incluindo cartões de crédito, débito e transferências bancárias. Os fundos são mantidos em custódia até que o Comprador confirme a receção e satisfação com o produto.</p>
+                    
+                    <h3>6.3 Envio e Entrega</h3>
+                    <p>Os Vendedores são responsáveis pelo envio dos produtos em tempo útil e em condições seguras. Devem fornecer informações de rastreio assim que disponíveis. Recomendamos o uso de serviços de envio registado e seguro.</p>
+                    
+                    <h3>6.4 Confirmação de Receção</h3>
+                    <p>Os Compradores devem confirmar a receção dos produtos dentro de 3 dias após a entrega. Se não houver confirmação dentro desse período, a transação será automaticamente finalizada.</p>
+                </section>
+                
+                <section id="prohibited" class="terms-section">
+                    <h2>7. Itens Proibidos</h2>
+                    <p>Os seguintes itens são estritamente proibidos na nossa plataforma:</p>
+                    <ul>
+                        <li>Calçados falsificados ou contrafeitos</li>
+                        <li>Calçados roubados ou de origem duvidosa</li>
+                        <li>Calçados danificados além da reparação</li>
+                        <li>Calçados inseguros ou não conformes com as normas de segurança</li>
+                        <li>Calçados sujos ou em condições insalubres</li>
+                        <li>Quaisquer itens que não sejam calçados</li>
+                    </ul>
+                </section>
+                
+                <section id="disputes" class="terms-section">
+                    <h2>8. Resolução de Disputas</h2>
+                    
+                    <h3>8.1 Mediação</h3>
+                    <p>Em caso de disputa entre Utilizadores, tentaremos mediar e encontrar uma solução justa. Ambas as partes devem fornecer provas para apoiar as suas reivindicações.</p>
+                    
+                    <h3>8.2 Reembolsos</h3>
+                    <p>Reembolsos podem ser concedidos em casos onde o produto recebido não corresponde significativamente à descrição ou está danificado. Avaliamos cada caso individualmente.</p>
+                    
+                    <h3>8.3 Decisão Final</h3>
+                    <p>A ResaleSneakers reserva-se o direito de tomar a decisão final em qualquer disputa. Ao utilizar a nossa plataforma, concorda em aceitar estas decisões.</p>
+                </section>
+                
+                <section id="limitations" class="terms-section">
+                    <h2>9. Limitações de Responsabilidade</h2>
+                    <p>A ResaleSneakers não é responsável por:</p>
+                    <ul>
+                        <li>A qualidade, segurança ou legalidade dos itens anunciados</li>
+                        <li>A veracidade ou precisão das descrições dos anúncios</li>
+                        <li>A capacidade dos Utilizadores em completar transações</li>
+                        <li>Perdas ou danos resultantes de transações</li>
+                        <li>Interrupções ou falhas no serviço</li>
+                        <li>Perda de dados ou danos ao dispositivo do Utilizador</li>
+                    </ul>
+                </section>
+                
+                <section id="privacy" class="terms-section">
+                    <h2>10. Privacidade</h2>
+                    <p>A nossa Política de Privacidade detalha como recolhemos, usamos e protegemos os seus dados pessoais. Ao utilizar a nossa plataforma, concorda com a nossa Política de Privacidade.</p>
+                </section>
+                
+                <section id="termination" class="terms-section">
+                    <h2>11. Encerramento de Conta</h2>
+                    
+                    <h3>11.1 Encerramento pelo Utilizador</h3>
+                    <p>Pode encerrar a sua conta a qualquer momento. No entanto, será responsável por completar quaisquer transações pendentes.</p>
+                    
+                    <h3>11.2 Encerramento pela ResaleSneakers</h3>
+                    <p>Reservamo-nos o direito de suspender ou encerrar a sua conta por qualquer violação destes Termos, ou por qualquer comportamento que consideremos prejudicial à comunidade.</p>
+                </section>
+                
+                <section id="changes" class="terms-section">
+                    <h2>12. Alterações aos Termos</h2>
+                    <p>Podemos modificar estes Termos periodicamente. Continuando a utilizar a plataforma após quaisquer alterações, indica a sua aceitação dos novos Termos.</p>
+                </section>
+                
+                <section id="contact" class="terms-section">
+                    <h2>13. Contacto</h2>
+                    <p>Se tiver alguma questão sobre estes Termos, por favor contacte-nos em:</p>
+                    <p>Email: suporte@resalesneakers.pt</p>
+                    <p>Telefone: +351 210 123 456</p>
+                    <p>Endereço: Av. da Liberdade 245, 1250-143 Lisboa, Portugal</p>
+                </section>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>ResaleSneakers</h3>
+                    <p>A sua plataforma de confiança para comprar, vender e trocar calçados de qualidade.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Links Rápidos</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Explorar</a></li>
+                        <li><a href="product.html">Vender</a></li>
+                        <li><a href="help.html">Ajuda</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="terms.html">Termos e Condições</a></li>
+                        <li><a href="privacy.html">Política de Privacidade</a></li>
+                        <li><a href="cookies.html">Política de Cookies</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contacto</h3>
+                    <p>Email: suporte@resalesneakers.pt</p>
+                    <p>Telefone: +351 210 123 456</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 ResaleSneakers. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Scripts -->
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="auth.js"></script>
+    <script>
+        // Script para suavizar a rolagem para as âncoras
+        document.querySelectorAll('.terms-nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                window.scrollTo({
+                    top: targetElement.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

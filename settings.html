@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações - ResaleSneakers</title>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js"></script>
+    <!-- Scripts personalizados -->
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="auth.js"></script>
+    <script type="module" src="settings.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #4ecdc4;
+            --dark: #2d3436;
+            --light: #f9f9f9;
+            --gray: #dfe6e9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .settings-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            padding: 40px 0;
+        }
+        
+        .settings-sidebar {
+            flex: 1;
+            min-width: 250px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+        }
+        
+        .settings-sidebar h3 {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .settings-menu {
+            list-style: none;
+        }
+        
+        .settings-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .settings-menu a {
+            display: block;
+            padding: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: var(--dark);
+            transition: all 0.3s ease;
+        }
+        
+        .settings-menu a:hover, .settings-menu a.active {
+            background-color: var(--gray);
+            color: var(--primary);
+        }
+        
+        .settings-content {
+            flex: 3;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+        }
+        
+        .settings-section {
+            margin-bottom: 40px;
+        }
+        
+        .settings-section h2 {
+            margin-bottom: 20px;
+            color: var(--dark);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--gray);
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 16px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #ff5252;
+        }
+        
+        .btn-secondary {
+            background-color: var(--gray);
+            color: var(--dark);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #d2d8db;
+        }
+        
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .toggle-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .avatar-upload {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .avatar-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-bottom: 15px;
+            border: 3px solid var(--gray);
+        }
+        
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .btn-file {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-file input[type=file] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            min-width: 100%;
+            min-height: 100%;
+            font-size: 100px;
+            text-align: right;
+            filter: alpha(opacity=0);
+            opacity: 0;
+            outline: none;
+            cursor: pointer;
+            display: block;
+        }
+        
+        .notification-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .help-text {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .danger-zone {
+            background-color: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 5px;
+            padding: 20px;
+        }
+        
+        .danger-zone h3 {
+            color: #c53030;
+            margin-bottom: 15px;
+        }
+        
+        .section-description {
+            margin-bottom: 20px;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .settings-container {
+                flex-direction: column;
+            }
+            
+            .settings-sidebar, .settings-content {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">Resale<span>Sneakers</span></div>
+                
+                <div class="search-bar">
+                    <input type="text" placeholder="Encontre o sneaker dos seus sonhos...">
+                </div>
+                
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="products.html">Explorar</a>
+                    <a href="product.html">Vender</a>
+                    <a href="#">Trocar</a>
+                </div>
+                
+                <div class="user-actions">
+                    <a href="profile.html" id="profileLink" style="display: none;">Meu Perfil</a>
+                    <a href="auth.html" id="loginBtn" class="btn btn-outline">Entrar</a>
+                    <a href="#" id="logoutBtn" style="display: none;" class="btn btn-outline">Sair</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <div class="settings-container">
+                <div class="settings-sidebar">
+                    <h3>Configurações</h3>
+                    <ul class="settings-menu">
+                        <li><a href="#profile" class="active" onclick="switchTab('profile')">Perfil</a></li>
+                        <li><a href="#account" onclick="switchTab('account')">Conta</a></li>
+                        <li><a href="#security" onclick="switchTab('security')">Segurança</a></li>
+                        <li><a href="#notifications" onclick="switchTab('notifications')">Notificações</a></li>
+                        <li><a href="#payment" onclick="switchTab('payment')">Métodos de pagamento</a></li>
+                        <li><a href="#addresses" onclick="switchTab('addresses')">Endereços</a></li>
+                        <li><a href="#privacy" onclick="switchTab('privacy')">Privacidade</a></li>
+                    </ul>
+                </div>
+                
+                <div class="settings-content">
+                    <!-- Perfil Settings -->
+                    <div class="settings-section" id="profileSection">
+                        <h2>Configurações de Perfil</h2>
+                        <p class="section-description">Gerencie suas informações pessoais e como seu perfil aparece para outros usuários.</p>
+                        
+                        <div class="avatar-upload">
+                            <label>Foto de Perfil</label>
+                            <div class="avatar-preview">
+                                <img id="avatarPreview" src="/api/placeholder/150/150" alt="Avatar">
+                            </div>
+                            <span class="btn btn-secondary btn-file">
+                                Alterar foto
+                                <input type="file" id="avatarUpload" accept="image/*">
+                            </span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="displayName">Nome de exibição</label>
+                            <input type="text" id="displayName" class="form-control" placeholder="Seu nome para exibição">
+                            <p class="help-text">Este é o nome que outros usuários verão no site.</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="userBio">Bio</label>
+                            <textarea id="userBio" class="form-control" rows="4" placeholder="Conte um pouco sobre você e sua coleção..."></textarea>
+                            <p class="help-text">Máximo de 300 caracteres.</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="userLocation">Localização</label>
+                            <input type="text" id="userLocation" class="form-control" placeholder="Sua cidade e estado">
+                            <p class="help-text">Será exibido em seus anúncios para facilitar trocas presenciais.</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="userInstagram">Instagram (opcional)</label>
+                            <input type="text" id="userInstagram" class="form-control" placeholder="Seu nome de usuário no Instagram">
+                        </div>
+                        
+                        <button class="btn btn-primary" id="saveProfileBtn">Salvar alterações</button>
+                    </div>
+                    
+                    <!-- Account Settings -->
+                    <div class="settings-section" id="accountSection" style="display: none;">
+                        <h2>Configurações de Conta</h2>
+                        <p class="section-description">Atualize suas informações de conta e preferências.</p>
+                        
+                        <div class="form-group">
+                            <label for="userEmail">Email</label>
+                            <input type="email" id="userEmail" class="form-control" placeholder="Seu email">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="userPhone">Telemóvel</label>
+                            <input type="tel" id="userPhone" class="form-control" placeholder="Seu número de telemóvel">
+                            <p class="help-text">Usado apenas para verificação de conta e segurança.</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Idioma da plataforma</label>
+                            <select class="form-control">
+                                <option value="pt">Português (Portugal)</option>
+                                <option value="br">Português (Brasil)</option>
+                                <option value="en">Inglês</option>
+                                <option value="es">Espanhol</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Preferências de exibição</label>
+                            <div class="toggle-option">
+                                <span>Modo escuro</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="darkModeToggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" id="saveAccountBtn">Salvar alterações</button>
+                        
+                        <div class="danger-zone">
+                            <h3>Zona de perigo</h3>
+                            <p>Ações que afetam permanentemente sua conta.</p>
+                            <button class="btn btn-danger" id="deleteAccountBtn">Excluir minha conta</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Security Settings -->
+                    <div class="settings-section" id="securitySection" style="display: none;">
+                        <h2>Segurança</h2>
+                        <p class="section-description">Gerencie a segurança da sua conta e configure opções de autenticação.</p>
+                        
+                        <div class="form-group">
+                            <label for="currentPassword">Senha atual</label>
+                            <input type="password" id="currentPassword" class="form-control" placeholder="Sua senha atual">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="newPassword">Nova senha</label>
+                            <input type="password" id="newPassword" class="form-control" placeholder="Nova senha">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirmar nova senha</label>
+                            <input type="password" id="confirmPassword" class="form-control" placeholder="Confirme a nova senha">
+                        </div>
+                        
+                        <button class="btn btn-primary" id="changePasswordBtn">Atualizar senha</button>
+                        
+                        <hr style="margin: 30px 0;">
+                        
+                        <h3 style="margin-bottom: 20px;">Verificação em dois fatores</h3>
+                        <p style="margin-bottom: 20px;">Adicione uma camada extra de segurança à sua conta.</p>
+                        
+                        <div class="toggle-option">
+                            <span>Ativar verificação em dois fatores</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="twoFactorToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div id="twoFactorOptions" style="display: none; margin-top: 20px;">
+                            <div class="form-group">
+                                <label>Método de verificação</label>
+                                <select class="form-control" id="twoFactorMethod">
+                                    <option value="sms">SMS</option>
+                                    <option value="email">Email</option>
+                                    <option value="app">Aplicativo de autenticação</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-secondary" id="setupTwoFactorBtn">Configurar</button>
+                        </div>
+                        
+                        <hr style="margin: 30px 0;">
+                        
+                        <h3 style="margin-bottom: 20px;">Sessões ativas</h3>
+                        <p style="margin-bottom: 20px;">Dispositivos onde sua conta está conectada atualmente.</p>
+                        
+                        <div id="activeSessions">
+                            <div style="padding: 15px; background-color: var(--light); border-radius: 5px; margin-bottom: 10px;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <div>
+                                        <strong>Chrome em Windows</strong>
+                                        <p>Lisboa, Portugal</p>
+                                        <p>Atual sessão</p>
+                                    </div>
+                                    <button class="btn btn-secondary" disabled>Atual</button>
+                                </div>
+                            </div>
+                            
+                            <div style="padding: 15px; background-color: var(--light); border-radius: 5px; margin-bottom: 10px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>Safari em iPhone</strong>
+                                        <p>Porto, Portugal</p>
+                                        <p>Último acesso: Hoje, 10:23</p>
+                                    </div>
+                                    <button class="btn btn-danger">Terminar</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-danger" style="margin-top: 20px;" id="logoutAllBtn">Terminar todas as sessões</button>
+                    </div>
+                    
+                    <!-- Notifications Settings -->
+                    <div class="settings-section" id="notificationsSection" style="display: none;">
+                        <h2>Notificações</h2>
+                        <p class="section-description">Controle quais notificações você deseja receber e como recebê-las.</p>
+                        
+                        <h3 style="margin-bottom: 20px;">Notificações por email</h3>
+                        
+                        <div class="notification-item">
+                            <span>Novas mensagens</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="notification-item">
+                            <span>Propostas de compra</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="notification-item">
+                            <span>Propostas de troca</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="notification-item">
+                            <span>Atualizações do sistema</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="notification-item">
+                            <span>Newsletters e promoções</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <h3 style="margin: 30px 0 20px;">Notificações push (navegador)</h3>
+                        
+                        <div class="notification-item">
+                            <span>Permitir notificações push</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="pushToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div id="pushOptions" style="margin-top: 20px;">
+                            <div class="notification-item">
+                                <span>Novas mensagens</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="notification-item">
+                                <span>Propostas de compra/troca</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" style="margin-top: 20px;" id="saveNotificationsBtn">Salvar preferências</button>
+                    </div>
+                    
+                    <!-- Payment Methods Settings -->
+                    <div class="settings-section" id="paymentSection" style="display: none;">
+                        <h2>Métodos de pagamento</h2>
+                        <p class="section-description">Adicione e gerencie seus métodos de pagamento para transações mais rápidas.</p>
+                        
+                        <div id="savedPaymentMethods">
+                            <div style="padding: 15px; background-color: var(--light); border-radius: 5px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>Cartão VISA •••• 4587</strong>
+                                    <p>Expira em 06/2026</p>
+                                </div>
+                                <div>
+                                    <button class="btn btn-secondary" style="margin-right: 10px;">Editar</button>
+                                    <button class="btn btn-danger">Remover</button>
+                                </div>
+                            </div>
+                            
+                            <div style="padding: 15px; background-color: var(--light); border-radius: 5px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>MBWay - 912 345 678</strong>
+                                </div>
+                                <div>
+                                    <button class="btn btn-secondary" style="margin-right: 10px;">Editar</button>
+                                    <button class="btn btn-danger">Remover</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" style="margin-top: 20px;" id="addPaymentMethodBtn">Adicionar método de pagamento</button>
+                        
+                        <div id="addPaymentForm" style="display: none; margin-top: 30px;">
+                            <h3 style="margin-bottom: 20px;">Adicionar novo método de pagamento</h3>
+                            
+                            <div class="form-group">
+                                <label>Tipo de método</label>
+                                <select class="form-control" id="paymentMethodType">
+                                    <option value="card">Cartão de crédito/débito</option>
+                                    <option value="mbway">MBWay</option>
+                                    <option value="paypal">PayPal</option>
+                                </select>
+                            </div>
+                            
+                            <div id="cardForm">
+                                <div class="form-group">
+                                    <label for="cardNumber">Número do cartão</label>
+                                    <input type="text" id="cardNumber" class="form-control" placeholder="1234 5678 9012 3456">
+                                </div>
+                                
+                                <div style="display: flex; gap: 15px;">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label for="expiryDate">Data de validade</label>
+                                        <input type="text" id="expiryDate" class="form-control" placeholder="MM/AA">
+                                    </div>
+                                    
+                                    <div class="form-group" style="flex: 1;">
+                                        <label for="cvv">CVV</label>
+                                        <input type="text" id="cvv" class="form-control" placeholder="123">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="cardName">Nome no cartão</label>
+                                    <input type="text" id="cardName" class="form-control" placeholder="Como aparece no cartão">
+                                </div>
+                            </div>
+                            
+                            <div id="mbwayForm" style="display: none;">
+                                <div class="form-group">
+                                    <label for="mbwayPhone">Número de telemóvel</label>
+                                    <input type="tel" id="mbwayPhone" class="form-control" placeholder="9xx xxx xxx">
+                                </div>
+                            </div>
+                            
+                            <div id="paypalForm" style="display: none;">
+                                <div class="form-group">
+                                    <label for="paypalEmail">Email do PayPal</label>
+                                    <input type="email" id="paypalEmail" class="form-control" placeholder="seu.email@exemplo.com">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="toggle-option">
+                                    <span>Definir como método padrão</span>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="defaultPaymentMethod">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary" id="savePaymentMethodBtn">Salvar método de pagamento</button>
+                            <button class="btn btn-secondary" id="cancelPaymentMethodBtn">Cancelar</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Addresses Settings -->
+                    <div class="settings-section" id="addressesSection" style="display: none;">
+                        <h2>Endereços</h2>
+                        <p class="section-description">Adicione e gerencie seus endereços para envio e recebimento de produtos.</p>
+                        
+                        <div id="savedAddresses">
+                            <div style="padding: 15px; background-color: var(--light); border-radius: 5px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                                        <strong>Casa</strong>
+                                        <span style="background-color: var(--primary); color: white; font-size: 12px; padding: 3px 8px; border-radius: 30px; margin-left: 10px;">Principal</span>
+                                    </div>
+                                    <p>João Silva</p>
+                                    <p>Rua das Flores, 123</p>
+                                    <p>1000-001 Lisboa</p>
+                                    <p>Portugal</p>
+                                    <p>Telefone: 912 345 678</p>
+                                </div>
+                                <div>
+                                    <button class="btn btn-secondary" style="margin-right: 10px;">Editar</button>
+                                    <button class="btn btn-danger">Remover</button>
+                                </div>
+                            </div>
+                            
+                            <div style="padding: 15px; background-color: var(--light); border-radius: 5px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <strong>Trabalho</strong>
+                                    <p>João Silva</p>
+                                    <p>Avenida da Liberdade, 456</p>
+                                    <p>1250-145 Lisboa</p>
+                                    <p>Portugal</p>
+                                    <p>Telefone: 912 345 678</p>
+                                </div>
+                                <div>
+                                    <button class="btn btn-secondary" style="margin-right: 10px;">Editar</button>
+                                    <button class="btn btn-danger">Remover</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" style="margin-top: 20px;" id="addAddressBtn">Adicionar novo endereço</button>
+                        
+                        <div id="addAddressForm" style="display: none; margin-top: 30px;">
+                            <h3 style="margin-bottom: 20px;">Adicionar novo endereço</h3>
+                            
+                            <div class="form-group">
+                                <label for="addressName">Nome do endereço</label>
+                                <input type="text" id="addressName" class="form-control" placeholder="Ex: Casa, Trabalho, etc.">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="addressFullName">Nome completo</label>
+                                <input type="text" id="addressFullName" class="form-control" placeholder="Nome completo de quem vai receber">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="addressStreet">Rua e número</label>
+                                <input type="text" id="addressStreet" class="form-control" placeholder="Rua, Avenida, etc. e número">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="addressComplement">Complemento (opcional)</label>
+                                <input type="text" id="addressComplement" class="form-control" placeholder="Apartamento, bloco, etc.">
+                            </div>
+                            
+                            <div style="display: flex; gap: 15px;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="addressPostalCode">Código postal</label>
+                                    <input type="text" id="addressPostalCode" class="form-control" placeholder="0000-000">
+                                </div>
+                                
+                                <div class="form-group" style="flex: 2;">
+                                    <label for="addressCity">Cidade</label>
+                                    <input type="text" id="addressCity" class="form-control" placeholder="Cidade">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="addressCountry">País</label>
+                                <select id="addressCountry" class="form-control">
+                                    <option value="pt">Portugal</option>
+                                    <option value="es">Espanha</option>
+                                    <option value="fr">França</option>
+                                    <option value="other">Outro</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="addressPhone">Telefone para contato</label>
+                                <input type="tel" id="addressPhone" class="form-control" placeholder="Número de telefone">
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="toggle-option">
+                                    <span>Definir como endereço principal</span>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="defaultAddress">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary" id="saveAddressBtn">Salvar endereço</button>
+                            <button class="btn btn-secondary" id="cancelAddressBtn">Cancelar</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Privacy Settings -->
+                    <div class="settings-section" id="privacySection" style="display: none;">
+                        <h2>Privacidade</h2>
+                        <p class="section-description">Controle como suas informações são usadas e compartilhadas na plataforma.</p>
+                        
+                        <h3 style="margin-bottom: 20px;">Visibilidade do perfil</h3>
+                        
+                        <div class="form-group">
+                            <label>Quem pode ver meu perfil</label>
+                            <select class="form-control" id="profileVisibility">
+                                <option value="public">Todos os usuários</option>
+                                <option value="registered">Apenas usuários registrados</option>
+                                <option value="followers">Apenas quem eu sigo</option>
+                            </select>
+                        </div>
+                        
+                        <div class="toggle-option">
+                            <span>Mostrar meu histórico de compras no perfil</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="showPurchaseHistory">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="toggle-option">
+                            <span>Mostrar meu histórico de vendas no perfil</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="showSalesHistory" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="toggle-option">
+                            <span>Exibir meu número de telefone para compradores</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="showPhoneNumber">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <h3 style="margin: 30px 0 20px;">Preferências de dados</h3>
+                        
+                        <div class="toggle-option">
+                            <span>Permitir uso de cookies para personalização</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="allowCookies" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="toggle-option">
+                            <span>Permitir uso de dados para recomendações personalizadas</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="allowPersonalization" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="toggle-option">
+                            <span>Compartilhar dados de uso anonimizados para melhorar o serviço</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="shareAnonymousData" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <button class="btn btn-primary" style="margin-top: 20px;" id="savePrivacyBtn">Salvar preferências</button>
+                        
+                        <div class="danger-zone" style="margin-top: 40px;">
+                            <h3>Dados pessoais</h3>
+                            <p>Opções relacionadas aos seus dados pessoais na plataforma.</p>
+                            <button class="btn btn-secondary" style="margin-top: 15px;" id="downloadDataBtn">Baixar meus dados</button>
+                            <button class="btn btn-danger" style="margin-top: 15px;" id="deleteDataBtn">Solicitar exclusão de dados</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-columns">
+                <div class="footer-column">
+                    <h3>ResaleSneakers</h3>
+                    <p>A melhor plataforma de compra, venda e troca de sneakers em Portugal.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Links rápidos</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Explorar</a></li>
+                        <li><a href="#">Como vender</a></li>
+                        <li><a href="#">Como comprar</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Suporte</h4>
+                    <ul>
+                        <li><a href="#">Centro de ajuda</a></li>
+                        <li><a href="#">Contato</a></li>
+                        <li><a href="#">Autenticação</a></li>
+                        <li><a href="#">Termos de serviço</a></li>
+                        <li><a href="#">Política de privacidade</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Newsletter</h4>
+                    <p>Inscreva-se para receber novidades e ofertas exclusivas.</p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Seu email" required>
+                        <button type="submit">Inscrever</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 ResaleSneakers. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Tab switching functionality
+        function switchTab(tab) {
+            // Hide all sections
+            document.querySelectorAll('.settings-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.settings-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(tab + 'Section').style.display = 'block';
+            
+            // Add active class to selected tab
+            document.querySelector(`.settings-menu a[href="#${tab}"]`).classList.add('active');
+        }
+        
+        // Two-factor authentication toggle
+        const twoFactorToggle = document.getElementById('twoFactorToggle');
+        const twoFactorOptions = document.getElementById('twoFactorOptions');
+        
+        twoFactorToggle.addEventListener('change', function() {
+            twoFactorOptions.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // Payment method form toggle
+        const addPaymentMethodBtn = document.getElementById('addPaymentMethodBtn');
+        const addPaymentForm = document.getElementById('addPaymentForm');
+        const cancelPaymentMethodBtn = document.getElementById('cancelPaymentMethodBtn');
+        
+        addPaymentMethodBtn.addEventListener('click', function() {
+            addPaymentForm.style.display = 'block';
+            this.style.display = 'none';
+        });
+        
+        cancelPaymentMethodBtn.addEventListener('click', function() {
+            addPaymentForm.style.display = 'none';
+            addPaymentMethodBtn.style.display = 'block';
+        });
+        
+        // Payment method type toggle
+        const paymentMethodType = document.getElementById('paymentMethodType');
+        const cardForm = document.getElementById('cardForm');
+        const mbwayForm = document.getElementById('mbwayForm');
+        const paypalForm = document.getElementById('paypalForm');
+        
+        paymentMethodType.addEventListener('change', function() {
+            cardForm.style.display = 'none';
+            mbwayForm.style.display = 'none';
+            paypalForm.style.display = 'none';
+            
+            if (this.value === 'card') {
+                cardForm.style.display = 'block';
+            } else if (this.value === 'mbway') {
+                mbwayForm.style.display = 'block';
+            } else if (this.value === 'paypal') {
+                paypalForm.style.display = 'block';
+            }
+        });
+        
+        // Address form toggle
+        const addAddressBtn = document.getElementById('addAddressBtn');
+        const addAddressForm = document.getElementById('addAddressForm');
+        const cancelAddressBtn = document.getElementById('cancelAddressBtn');
+        
+        addAddressBtn.addEventListener('click', function() {
+            addAddressForm.style.display = 'block';
+            this.style.display = 'none';
+        });
+        
+        cancelAddressBtn.addEventListener('click', function() {
+            addAddressForm.style.display = 'none';
+            addAddressBtn.style.display = 'block';
+        });
+        
+        // Save buttons functionality
+        // (These would typically update Firebase in a real implementation)
+        document.getElementById('saveProfileBtn').addEventListener('click', function() {
+            alert('Alterações no perfil salvas com sucesso!');
+        });
+        
+        document.getElementById('saveAccountBtn').addEventListener('click', function() {
+            alert('Alterações na conta salvas com sucesso!');
+        });
+        
+        document.getElementById('changePasswordBtn').addEventListener('click', function() {
+            alert('Senha atualizada com sucesso!');
+        });
+        
+        document.getElementById('saveNotificationsBtn').addEventListener('click', function() {
+            alert('Preferências de notificações salvas com sucesso!');
+        });
+        
+        document.getElementById('savePaymentMethodBtn').addEventListener('click', function() {
+            alert('Método de pagamento salvo com sucesso!');
+            addPaymentForm.style.display = 'none';
+            addPaymentMethodBtn.style.display = 'block';
+        });
+        
+        document.getElementById('saveAddressBtn').addEventListener('click', function() {
+            alert('Endereço salvo com sucesso!');
+            addAddressForm.style.display = 'none';
+            addAddressBtn.style.display = 'block';
+        });
+        
+        document.getElementById('savePrivacyBtn').addEventListener('click', function() {
+            alert('Preferências de privacidade salvas com sucesso!');
+        });
+        
+        // Avatar upload preview
+        const avatarUpload = document.getElementById('avatarUpload');
+        const avatarPreview = document.getElementById('avatarPreview');
+        
+        avatarUpload.addEventListener('change', function(event) {
+            if (event.target.files && event.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarPreview.src = e.target.result;
+                };
+                reader.readAsDataURL(event.target.files[0]);
+            }
+        });
+        
+        // Dangerous actions confirmation
+        document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+            if (confirm('Tem certeza de que deseja excluir sua conta? Esta ação não pode ser desfeita.')) {
+                alert('Conta excluída com sucesso.');
+                // Redirect to homepage or sign-up page in a real implementation
+            }
+        });
+        
+        document.getElementById('deleteDataBtn').addEventListener('click', function() {
+            if (confirm('Tem certeza de que deseja solicitar a exclusão de seus dados? Esta ação não pode ser desfeita.')) {
+                alert('Solicitação de exclusão de dados enviada com sucesso. Entraremos em contato em breve.');
+            }
+        });
+        
+        document.getElementById('downloadDataBtn').addEventListener('click', function() {
+            alert('Solicitação de download de dados recebida. Você receberá um email com seus dados em breve.');
+        });
+        
+        document.getElementById('logoutAllBtn').addEventListener('click', function() {
+            if (confirm('Tem certeza de que deseja encerrar todas as sessões ativas?')) {
+                alert('Todas as sessões foram encerradas com sucesso.');
+            }
+        });
+    </script>
+</body>
+</html>

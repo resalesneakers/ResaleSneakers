@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - ResaleSneakers</title>
+    <!-- Firebase scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js"></script>
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="auth.js"></script>
+    <script type="module" src="profile.js"></script>
+    <script type="module" src="products.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #4ecdc4;
+            --dark: #2d3436;
+            --light: #f9f9f9;
+            --gray: #dfe6e9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header styles */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .logo span {
+            color: var(--primary);
+        }
+        
+        .search-bar {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--gray);
+            border-radius: 30px;
+            font-size: 14px;
+        }
+        
+        .nav-links {
+            display: flex;
+        }
+        
+        .nav-links a, .user-menu a {
+            margin: 0 10px;
+            color: var(--dark);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover, .user-menu a:hover {
+            color: var(--primary);
+        }
+        
+        .user-menu a.active {
+            color: var(--primary);
+        }
+        
+        /* Profile Section */
+        .profile-section {
+            padding: 40px 0;
+        }
+        
+        .profile-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .profile-sidebar {
+            flex: 1;
+            min-width: 250px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+        }
+        
+        .profile-main {
+            flex: 3;
+            min-width: 300px;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--gray);
+            margin-right: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .profile-avatar .edit-icon {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background-color: var(--primary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .profile-info h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .profile-info p {
+            color: #777;
+            margin-bottom: 5px;
+        }
+        
+        .profile-stats {
+            display: flex;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            margin-right: 20px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #777;
+        }
+        
+        .profile-nav {
+            margin: 20px 0;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-item.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .nav-item:hover:not(.active) {
+            background-color: var(--gray);
+        }
+        
+        .nav-icon {
+            margin-right: 10px;
+        }
+        
+        .content-box {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .content-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .add-btn {
+            padding: 8px 15px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .add-btn:hover {
+            background-color: #ff5252;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .product-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-img {
+            height: 150px;
+            background-color: var(--gray);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .product-status {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-new {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .status-used {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .status-trade {
+            background-color: #a29bfe;
+            color: white;
+        }
+        
+        .product-info {
+            padding: 10px;
+        }
+        
+        .product-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .product-price {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .product-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .edit-btn, .delete-btn {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .edit-btn {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .delete-btn {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .messages-list {
+            margin-top: 20px;
+        }
+        
+        .message-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--gray);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .message-item:hover {
+            background-color: var(--light);
+        }
+        
+        .message-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--gray);
+            margin-right: 15px;
+            overflow: hidden;
+        }
+        
+        .message-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .message-content {
+            flex: 1;
+        }
+        
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .message-sender {
+            font-weight: 500;
+        }
+        
+        .message-time {
+            font-size: 12px;
+            color: #777;
+        }
+        
+        .message-preview {
+            font-size: 14px;
+            color: #777;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .unread {
+            position: relative;
+        }
+        
+        .unread:before {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            left: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background-color: var(--gray);
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        
+        .tab.active {
+            background-color: white;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        /* Settings form */
+        .settings-form {
+            margin-top: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--gray);
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .save-btn {
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .save-btn:hover {
+            background-color: #ff5252;
+        }
+        
+        /* Hidden sections */
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .profile-container {
+                flex-direction: column;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-avatar {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+            
+            .profile-stats {
+                justify-content: center;
+            }
+            
+            .nav-links, .user-menu {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">Resale<span>Sneakers</span></div>
+                
+                <div class="search-bar">
+                    <input type="text" placeholder="Encontre o sneaker dos seus sonhos...">
+                </div>
+                
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="products.html">Explorar</a>
+                    <a href="sell.html">Vender</a>
+                    <a href="chat.html">Mensagens</a>
+                </div>
+                <div class="user-menu">
+                    <a href="profile.html" class="active">Meu Perfil</a>
+                    <a href="#" id="logout-btn">Sair</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Profile Section -->
+    <section class="profile-section">
+        <div class="container">
+            <div class="profile-container">
+                <!-- Sidebar -->
+                <div class="profile-sidebar">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <img id="user-avatar" src="images/default-avatar.jpg" alt="Avatar do usuário">
+                            <div class="edit-icon">
+                                <i class="fas fa-camera"></i>
+                                <input type="file" id="avatar-upload" hidden accept="image/*">
+                            </div>
+                        </div>
+                        <div class="profile-info">
+                            <h1 id="user-name">Carregando...</h1>
+                            <p id="user-email">carregando@email.com</p>
+                            <p id="user-location">Lisboa, Portugal</p>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="listings-count">0</div>
+                            <div class="stat-label">Anúncios</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="sales-count">0</div>
+                            <div class="stat-label">Vendas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="rating">0.0</div>
+                            <div class="stat-label">Avaliação</div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-nav">
+                        <div class="nav-item active" data-section="products">
+                            <span class="nav-icon"><i class="fas fa-shoe-prints"></i></span>
+                            Meus Anúncios
+                        </div>
+                        <div class="nav-item" data-section="messages">
+                            <span class="nav-icon"><i class="fas fa-envelope"></i></span>
+                            Mensagens
+                        </div>
+                        <div class="nav-item" data-section="settings">
+                            <span class="nav-icon"><i class="fas fa-cog"></i></span>
+                            Configurações
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Main Content -->
+                <div class="profile-main">
+                    <!-- Products Section -->
+                    <div class="content-section active" id="products-section">
+                        <div class="content-box">
+                            <div class="content-header">
+                                <h2 class="content-title">Meus Anúncios</h2>
+                                <button class="add-btn" id="add-product-btn">Adicionar Produto</button>
+                            </div>
+                            
+                            <div class="tabs">
+                                <div class="tab active" data-status="all">Todos</div>
+                                <div class="tab" data-status="active">Ativos</div>
+                                <div class="tab" data-status="sold">Vendidos</div>
+                            </div>
+                            
+                            <div class="product-grid" id="products-container">
+                                <!-- Products will be loaded dynamically -->
+                                <!-- Example product card for placeholder -->
+                                <div class="product-card" style="display: none;">
+                                    <div class="product-img">
+                                        <img src="images/default-product.jpg" alt="Produto">
+                                        <div class="product-status status-new">Novo</div>
+                                    </div>
+                                    <div class="product-info">
+                                        <h3 class="product-title">Nike Air Jordan 1</h3>
+                                        <div class="product-price">€199,99</div>
+                                        <div class="product-actions">
+                                            <button class="edit-btn">Editar</button>
+                                            <button class="delete-btn">Apagar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Messages Section -->
+                    <div class="content-section" id="messages-section">
+                        <div class="content-box">
+                            <div class="content-header">
+                                <h2 class="content-title">Mensagens</h2>
+                            </div>
+                            
+                            <div class="messages-list" id="messages-container">
+                                <!-- Messages will be loaded dynamically -->
+                                <!-- Example message for placeholder -->
+                                <div class="message-item unread" style="display: none;">
+                                    <div class="message-avatar">
+                                        <img src="images/default-avatar.jpg" alt="Avatar">
+                                    </div>
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <div class="message-sender">João Silva</div>
+                                            <div class="message-time">Há 2 horas</div>
+                                        </div>
+                                        <div class="message-preview">Olá, tenho interesse nos seus Adidas Yeezy. Ainda estão disponíveis?</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings Section -->
+                    <div class="content-section" id="settings-section">
+                        <div class="content-box">
+                            <div class="content-header">
+                                <h2 class="content-title">Configurações da Conta</h2>
+                            </div>
+                            
+                            <div class="settings-form">
+                                <div class="form-group">
+                                    <label for="display-name">Nome de Exibição</label>
+                                    <input type="text" id="display-name" placeholder="Seu nome">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="user-location-input">Localização</label>
+                                    <input type="text" id="user-location-input" placeholder="Cidade, País">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="user-bio">Sobre Mim</label>
+                                    <textarea id="user-bio" placeholder="Conte um pouco sobre você..."></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="user-password">Alterar Senha</label>
+                                    <input type="password" id="user-password" placeholder="Nova senha">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="user-confirm-password">Confirmar Nova Senha</label>
+                                    <input type="password" id="user-confirm-password" placeholder="Confirmar nova senha">
+                                </div>
+                                
+                                <button class="save-btn" id="save-settings-btn">Salvar Alterações</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Font Awesome for icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    
+    <script>
+        // Navigation between tabs
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all items
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                // Add active class to clicked item
+                this.classList.add('active');
+                
+                // Hide all content sections
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Show selected section
+                const sectionId = this.getAttribute('data-section') + '-section';
+                document.getElementById(sectionId).classList.add('active');
+            });
+        });
+        
+        // Product tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Here you would add code to filter products based on status
+                const status = this.getAttribute('data-status');
+                filterProducts(status);
+            });
+        });
+        
+        // Avatar upload
+        document.querySelector('.edit-icon').addEventListener('click', function() {
+            document.getElementById('avatar-upload').click();
+        });
+        
+        document.getElementById('avatar-upload').addEventListener('change', function(e) {
+            if (e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('user-avatar').src = event.target.result;
+                    // Upload the image to Firebase Storage
+                    uploadAvatar(e.target.files[0]);
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+        
+        // Logout functionality
+        document.getElementById('logout-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            // Call the logout function from auth.js
+            logout();
+        });
+        
+        // Load user data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            checkAuth();
+            // Load user profile data
+            loadUserProfile();
+            // Load user products
+            loadUserProducts();
+            // Load user messages
+            loadUserMessages();
+        });
+    </script>
+</body>
+</html>

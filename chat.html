@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversas - ResaleSneakers</title>
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js"></script>
+    <!-- Scripts personalizados -->
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="auth.js"></script>
+    <script type="module" src="chat.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #4ecdc4;
+            --dark: #2d3436;
+            --light: #f9f9f9;
+            --gray: #dfe6e9;
+            --lighterGray: #f5f5f5;
+        }
+        
+        body {
+            background-color: var(--light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        main {
+            flex: 1;
+            padding: 20px 0;
+        }
+        
+        .chat-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            height: calc(100vh - 200px);
+            min-height: 500px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .conversation-list {
+            width: 300px;
+            border-right: 1px solid var(--gray);
+            overflow-y: auto;
+        }
+        
+        .conversation-search {
+            padding: 15px;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .conversation-search input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--gray);
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .conversation-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--gray);
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .conversation-item:hover, .conversation-item.active {
+            background-color: var(--lighterGray);
+        }
+        
+        .conversation-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--gray);
+            margin-right: 15px;
+            overflow: hidden;
+        }
+        
+        .conversation-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .conversation-info {
+            flex: 1;
+        }
+        
+        .conversation-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .conversation-preview {
+            font-size: 13px;
+            color: #777;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+        
+        .conversation-meta {
+            text-align: right;
+        }
+        
+        .conversation-time {
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 5px;
+        }
+        
+        .unread-badge {
+            background-color: var(--primary);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 3px 6px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--gray);
+            display: flex;
+            align-items: center;
+            background-color: white;
+        }
+        
+        .chat-product {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            background-color: var(--lighterGray);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .product-thumbnail {
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            background-color: var(--gray);
+            margin-right: 10px;
+            overflow: hidden;
+        }
+        
+        .product-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: var(--lighterGray);
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            max-width: 70%;
+        }
+        
+        .message-self {
+            margin-left: auto;
+        }
+        
+        .message-content {
+            padding: 10px 15px;
+            border-radius: 15px;
+            position: relative;
+        }
+        
+        .message-self .message-content {
+            background-color: var(--primary);
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+        
+        .message-other .message-content {
+            background-color: white;
+            border-bottom-left-radius: 0;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .message-time {
+            font-size: 11px;
+            color: #777;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .message-self .message-time {
+            color: #ddd;
+        }
+        
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid var(--gray);
+            display: flex;
+            align-items: center;
+            background-color: white;
+        }
+        
+        .chat-input textarea {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--gray);
+            border-radius: 20px;
+            resize: none;
+            max-height: 100px;
+            min-height: 40px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        .chat-actions {
+            display: flex;
+            margin-left: 10px;
+        }
+        
+        .chat-action-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 5px;
+        }
+        
+        .send-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+        
+        .attach-btn {
+            border: 1px solid var(--gray);
+            color: #777;
+        }
+        
+        .attach-btn:hover {
+            background-color: var(--lighterGray);
+        }
+        
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            color: #777;
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--gray);
+        }
+        
+        .empty-text h3 {
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+        
+        @media (max-width: 768px) {
+            .chat-container {
+                flex-direction: column;
+                height: calc(100vh - 170px);
+            }
+            
+            .conversation-list {
+                width: 100%;
+                height: 300px;
+                border-right: none;
+                border-bottom: 1px solid var(--gray);
+            }
+            
+            .chat-product {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header com navegação -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">Resale<span>Sneakers</span></div>
+                
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="products.html">Explorar</a>
+                    <a href="product.html">Vender</a>
+                    <a href="chat.html" class="active">Mensagens</a>
+                    <a href="profile.html">Perfil</a>
+                </div>
+                
+                <div class="user-actions">
+                    <a href="profile.html" class="user-avatar-small" id="userAvatar"></a>
+                    <a href="#" id="logoutBtn" class="btn btn-outline">Sair</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <main>
+        <div class="container">
+            <div class="chat-container">
+                <!-- Lista de conversas -->
+                <div class="conversation-list">
+                    <div class="conversation-search">
+                        <input type="text" placeholder="Procurar conversas...">
+                    </div>
+                    
+                    <!-- Conversas serão carregadas dinamicamente pelo chat.js -->
+                    <div id="conversationList">
+                        <!-- Exemplos para visualização -->
+                        <div class="conversation-item active">
+                            <div class="conversation-avatar"></div>
+                            <div class="conversation-info">
+                                <div class="conversation-name">João Silva</div>
+                                <div class="conversation-preview">Olá, o Nike Air Jordan ainda está disponível?</div>
+                            </div>
+                            <div class="conversation-meta">
+                                <div class="conversation-time">14:32</div>
+                                <div class="unread-badge">2</div>
+                            </div>
+                        </div>
+                        
+                        <div class="conversation-item">
+                            <div class="conversation-avatar"></div>
+                            <div class="conversation-info">
+                                <div class="conversation-name">Ana Oliveira</div>
+                                <div class="conversation-preview">Podemos combinar a troca para amanhã?</div>
+                            </div>
+                            <div class="conversation-meta">
+                                <div class="conversation-time">Ontem</div>
+                            </div>
+                        </div>
+                        
+                        <div class="conversation-item">
+                            <div class="conversation-avatar"></div>
+                            <div class="conversation-info">
+                                <div class="conversation-name">Miguel Santos</div>
+                                <div class="conversation-preview">Qual é o tamanho do Adidas?</div>
+                            </div>
+                            <div class="conversation-meta">
+                                <div class="conversation-time">Seg</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chat principal -->
+                <div class="chat-main">
+                    <div class="chat-header">
+                        <div class="conversation-avatar"></div>
+                        <div class="conversation-info">
+                            <div class="conversation-name">João Silva</div>
+                            <div class="conversation-status">Online agora</div>
+                        </div>
+                        
+                        <div class="chat-product">
+                            <div class="product-thumbnail"></div>
+                            <div class="product-info">
+                                <div class="product-name">Nike Air Jordan 1</div>
+                                <div class="product-price">€120</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Mensagens serão carregadas dinamicamente pelo chat.js -->
+                        <div class="message message-other">
+                            <div class="message-content">
+                                Olá, o Nike Air Jordan ainda está disponível?
+                            </div>
+                            <div class="message-time">14:30</div>
+                        </div>
+                        
+                        <div class="message message-self">
+                            <div class="message-content">
+                                Olá! Sim, ainda está disponível. Está interessado?
+                            </div>
+                            <div class="message-time">14:31</div>
+                        </div>
+                        
+                        <div class="message message-other">
+                            <div class="message-content">
+                                Sim, estou interessado! Qual é o estado do calçado? Tem fotos adicionais?
+                            </div>
+                            <div class="message-time">14:32</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input">
+                        <textarea placeholder="Escreve uma mensagem..." id="messageInput"></textarea>
+                        <div class="chat-actions">
+                            <div class="chat-action-btn attach-btn" id="attachBtn">📎</div>
+                            <button class="chat-action-btn send-btn" id="sendBtn">➤</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Estado vazio (mostrado quando não há conversa selecionada) -->
+                <div class="empty-state" style="display: none;">
+                    <div class="empty-icon">💬</div>
+                    <div class="empty-text">
+                        <h3>As tuas mensagens</h3>
+                        <p>Seleciona uma conversa ou inicia uma nova ao clicar em "Conversar" num anúncio.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <div class="copyright">
+                &copy; 2025 ResaleSneakers. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!-- In product card -->
+<a href="#" class="chat-now" onclick="openChatForProduct('${productId}')">
+    Conversar com vendedor
+  </a>
+  
+  <script>
+  function openChatForProduct(productId) {
+    // Check if user is logged in
+    if (!currentUser) {
+      // Redirect to login page
+      window.location.href = 'auth.html';
+      return;
+    }
+    
+    // Open chat modal or navigate to chat page
+    openChatModal(productId);
+  }
+  </script>
