@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResaleSneakers - Venda e troque seus calçados</title>
+    <!-- Firebase App (core) -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js"></script>
+    <!-- Firestore (banco de dados) -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js"></script>
+    <!-- Firebase Storage -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js"></script>
+    <!-- Seus scripts personalizados -->
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="auth.js"></script>
+    <script type="module" src="products.js"></script>
+    <script type="module" src="chat.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    
+    <style>
+        /* Variáveis CSS */
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #4ecdc4;
+            --dark: #2d3436;
+            --light: #f9f9f9;
+            --gray: #dfe6e9;
+        }
+        
+        /* Estilos Gerais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .logo span {
+            color: var(--dark);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .search-bar {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+            position: relative;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--gray);
+            border-radius: 30px;
+            font-size: 14px;
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: #ff5252;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: var(--dark);
+            border: 1px solid var(--gray);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--gray);
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/api/placeholder/1200/600') center/cover no-repeat;
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        /* CTA Banner */
+        .cta-banner {
+            background-color: var(--primary);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+        
+        .cta-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .cta-banner h2 {
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+        
+        .cta-banner p {
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        
+        .cta-btn {
+            display: inline-block;
+            background-color: white;
+            color: var(--primary);
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .cta-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Categories */
+        .categories {
+            padding: 60px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 32px;
+            position: relative;
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 3px;
+            background-color: var(--primary);
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .category-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .category-img {
+            height: 150px;
+            background-color: var(--gray);
+        }
+        
+        .category-info {
+            padding: 15px;
+            text-align: center;
+        }
+        
+        /* Featured Products */
+        .featured-products {
+            padding: 60px 0;
+            background-color: white;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        
+        .product-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-img {
+            height: 200px;
+            background-color: var(--gray);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-status {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-new {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .status-used {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .status-trade {
+            background-color: #a29bfe;
+            color: white;
+        }
+        
+        .product-info {
+            padding: 15px;
+        }
+        
+        .product-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .product-price {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .chat-now {
+            display: inline-block;
+            width: 100%;
+            padding: 8px 0;
+            background-color: var(--secondary);
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-now:hover {
+            background-color: #3bb3aa;
+        }
+        
+        /* How It Works */
+        .how-it-works {
+            padding: 60px 0;
+            background-color: var(--light);
+        }
+        
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .step {
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin: 0 10px 20px;
+        }
+        
+        .step-icon {
+            width: 80px;
+            height: 80px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: white;
+        }
+        
+        /* Chat Feature Showcase */
+        .chat-showcase {
+            padding: 60px 0;
+            background-color: var(--secondary);
+        }
+        
+        .chat-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .chat-info {
+            flex: 1;
+            color: white;
+            padding: 20px;
+            min-width: 300px;
+        }
+        
+        .chat-info h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        
+        .chat-info p {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .chat-features {
+            margin: 20px 0;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .feature-icon {
+            width: 30px;
+            height: 30px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: var(--secondary);
+            font-weight: bold;
+        }
+        
+        .chat-mockup {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            height: 400px;
+            margin: 20px;
+        }
+        
+        .chat-header {
+            background-color: var(--dark);
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--gray);
+            margin-right: 15px;
+        }
+        
+        .chat-body {
+            padding: 15px;
+            height: 290px;
+            overflow-y: auto;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            max-width: 80%;
+        }
+        
+        .sender {
+            margin-left: auto;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 15px 15px 0 15px;
+            padding: 10px 15px;
+        }
+        
+        .receiver {
+            background-color: var(--gray);
+            border-radius: 15px 15px 15px 0;
+            padding: 10px 15px;
+        }
+        
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid var(--gray);
+            display: flex;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--gray);
+            border-radius: 30px;
+            margin-right: 10px;
+        }
+        
+        .send-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        /* User Success Stories */
+        .success-stories {
+            padding: 60px 0;
+            background-color: white;
+        }
+        
+        .story-card {
+            background-color: var(--light);
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .story-image {
+            flex: 1;
+            min-width: 250px;
+            background-color: var(--gray);
+            border-radius: 10px;
+            height: 250px;
+            margin-right: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .story-content {
+            flex: 2;
+            min-width: 300px;
+        }
+        
+        .story-content h3 {
+            margin-bottom: 15px;
+            font-size: 24px;
+            color: var(--primary);
+        }
+        
+        .story-meta {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 30px;
+        }
+        
+        .user-info .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--gray);
+            margin-right: 15px;
+        }
+        
+        .story-result {
+            background-color: var(--secondary);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 30px;
+            font-size: 14px;
+        }
+        
+        /* Call to Action Bottom */
+        .cta-bottom {
+            background-color: var(--dark);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+        }
+        
+        .cta-bottom h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        
+        .cta-bottom p {
+            max-width: 600px;
+            margin: 0 auto 30px;
+            font-size: 18px;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 60px 0 20px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-column h3 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+        
+        .social-icon:hover {
+            background-color: var(--primary);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            .search-bar {
+                max-width: none;
+                margin: 15px 0;
+            }
+            
+            nav {
+                flex-direction: column;
+            }
+            
+            .nav-links {
+                margin: 15px 0;
+            }
+            
+            .steps {
+                flex-direction: column;
+            }
+            
+            .step {
+                margin-bottom: 30px;
+            }
+            
+            .chat-container {
+                flex-direction: column;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .hero-buttons .btn {
+                width: 100%;
+                max-width: 300px;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">Resale<span>Sneakers</span></div>
+                
+                <div class="search-bar">
+                    <input type="text" placeholder="Encontre o sneaker dos seus sonhos...">
+                </div>
+                
+                <div class="nav-links">
+                    <a href="resaleSneakers.html">Home</a>
+                    <a href="explorar.html">Explorar</a>
+                    <a href="#">Vender</a>
+                    <a href="#">Trocar</a>
+                </div>
+                
+                <div class="user-actions">
+                    <a href="auth.html" class="btn btn-outline">Entrar</a>
+                    <a href="auth.html" class="btn btn-primary">Cadastrar</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Transforme seus calçados em oportunidades</h1>
+            <p>Venda os sapatos que estão na sua casa sem uso ou troque por aquele par que você sempre quis. Negocie diretamente com outros sneakerheads.</p>
+            <div class="hero-buttons">
+                <a href="#" class="btn btn-primary">Anunciar meus calçados</a>
+                <a href="#" class="btn btn-outline">Procurar sneakers</a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Banner -->
+    <section class="cta-banner">
+        <div class="cta-content">
+            <h2>Tem calçados parados no armário?</h2>
+            <p>Fotografe, anuncie e venda em minutos! Mais de 50.000 usuários já estão trocando e vendendo seus sapatos na plataforma.</p>
+            <a href="#" class="cta-btn">CRIAR MINHA CONTA AGORA</a>
+        </div>
+    </section>
+    
+    <!-- Featured Products -->
+    <section class="featured-products">
+        <div class="container">
+            <h2 class="section-title">Calçados dos Nossos Usuários</h2>
+            <div class="product-grid">
+                <div class="product-card">
+                    <div class="product-img">
+                        <span class="product-status status-used">USADO</span>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Nike Air Jordan 1 Retro High</h3>
+                        <p class="product-price">R$ 1.200</p>
+                        <div class="product-meta">
+                            <span>Tamanho: 42</span>
+                            <span>São Paulo</span>
+                        </div>
+                        <a href="#" class="chat-now">Conversar com vendedor</a>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-img">
+                        <span class="product-status status-new">NOVO</span>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Adidas Yeezy Boost 350 V2</h3>
+                        <p class="product-price">R$ 1.800</p>
+                        <div class="product-meta">
+                            <span>Tamanho: 41</span>
+                            <span>Rio de Janeiro</span>
+                        </div>
+                        <a href="#" class="chat-now">Conversar com vendedor</a>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-img">
+                        <span class="product-status status-trade">TROCA</span>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">New Balance 550</h3>
+                        <p class="product-price">Troca por Air Force 1</p>
+                        <div class="product-meta">
+                            <span>Tamanho: 39</span>
+                            <span>Belo Horizonte</span>
+                        </div>
+                        <a href="#" class="chat-now">Propor troca</a>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-img">
+                        <span class="product-status status-used">USADO</span>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Vans Old Skool</h3>
+                        <p class="product-price">R$ 450</p>
+                        <div class="product-meta">
+                            <span>Tamanho: 40</span>
+                            <span>Curitiba</span>
+                        </div>
+                        <a href="#" class="chat-now">Conversar com vendedor</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">Como Funciona</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-icon">1</div>
+                    <h3>Fotografe seus calçados</h3>
+                    <p>Tire fotos dos seus sapatos que estão em casa sem uso</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-icon">2</div>
+                    <h3>Crie um anúncio gratuito</h3>
+                    <p>Defina o preço ou indique que está aberto a trocas</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-icon">3</div>
+                    <h3>Negocie pelo chat</h3>
+                    <p>Converse diretamente com interessados, sem intermediários</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-icon">4</div>
+                    <h3>Finalize a venda ou troca</h3>
+                    <p>Combine a entrega e receba seu pagamento ou novo calçado</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Chat Feature Showcase -->
+    <section class="chat-showcase">
+        <div class="container">
+            <div class="chat-container">
+                <div class="chat-info">
+                    <h2>Negociação direta via chat</h2>
+                    <p>Nosso sistema de mensagens permite que você negocie diretamente com outros usuários, sem intermediários, facilitando vendas e trocas.</p>
+                    
+                    <div class="chat-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">✓</div>
+                            <span>Negocie preços diretamente</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">✓</div>
+                            <span>Discuta detalhes sobre o estado do calçado</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">✓</div>
+                            <span>Proponha trocas por outros sneakers</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">✓</div>
+                            <span>Combine local de encontro ou envio</span>
+                        </div>
+                    </div>
+                    
+                    <a href="#" class="btn btn-primary">Começar agora</a>
+                </div>
+                
+                <div class="chat-mockup">
+                    <div class="chat-header">
+                        <div class="user-avatar"></div>
+                        <div>
+                            <strong>Marcelo Silva</strong>
+                            <p>Online agora</p>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-body">
+                        <div class="message receiver">
+                            Oi! Vi que você tem um Nike Air Max 90. Ainda está disponível?
+                        </div>
+                        
+                        <div class="message sender">
+                            Olá! Sim, ainda está disponível. Está em ótimo estado, usei apenas 3 vezes.
+                        </div>
+                        
+                        <div class="message receiver">
+                            Perfeito! Eu tenho um Adidas Ultraboost tamanho 42 em bom estado. Teria interesse em uma troca?
+                        </div>
+                        
+                        <div class="message sender">
+                            Pode mandar fotos? Dependendo do modelo e estado, podemos negociar sim!
+                        </div>
+                        
+                        <div class="message receiver">
+                            Claro! Estou enviando as fotos agora. O tênis está em ótimo estado, praticamente novo.
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input">
+                        <input type="text" placeholder="Digite sua mensagem...">
+                        <button class="send-btn">→</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- User Success Stories -->
+    <section class="success-stories">
+        <div class="container">
+            <h2 class="section-title">Histórias de Sucesso</h2>
+            
+            <div class="story-card">
+                <div class="story-image"></div>
+                <div class="story-content">
+                    <div class="story-meta">
+                        <div class="user-info">
+                            <div class="avatar"></div>
+                            <div>
+                                <strong>Pedro Almeida</strong>
+                                <p>São Paulo, SP</p>
+                            </div>
+                        </div>
+                        <span class="story-result">Venda Concluída</span>
+                    </div>
+                    <h3>"Vendi 6 pares que estavam sem uso em apenas 2 semanas!"</h3>
+                    <p>"Eu tinha vários sneakers que não usava mais ocupando espaço no meu armário. Decidi criar uma conta no ResaleSneakers e fotografei todos. Em apenas duas semanas, consegui vender 6 pares que estavam parados! O sistema de chat facilitou muito as negociações, pude conversar diretamente com os compradores e tirar todas as dúvidas. Recomendo para todos os colecionadores que querem renovar a coleção!"</p>
+                </div>
+            </div>
+            
+            <div class="story-card">
+                <div class="story-image"></div>
+                <div class="story-content">
+                    <div class="story-meta">
+                        <div class="user-info">
+                            <div class="avatar"></div>
+                            <div>
+                                <strong>Amanda Costa</strong>
+                                <p>Rio de Janeiro, RJ</p>
+                            </div>
+                        </div>
+                        <span class="story-result">Troca Realizada</span>
+                    </div>
+                    <h3>"Finalmente consegui o sneaker dos meus sonhos através de uma troca!"</h3>
+                    <p>"Estava procurando um Jordan 4 Retro há meses, mas não queria pagar o preço das lojas. Anunciei meu Dunk Low na plataforma aberto a trocas e em apenas 3 dias recebi uma proposta incrível! Conversamos pelo chat, trocamos fotos adicionais e informações, e marcamos um encontro para fazer a troca. O processo foi super tranquilo e seguro. Agora tenho o tênis que sempre quis sem gastar uma fortuna!"</p>
+                </div>
+            </div>
+            
+        </body>
+        </html>
