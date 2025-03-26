@@ -7,6 +7,7 @@ function loadFeaturedProducts() {
     // Limpar o container
     featuredContainer.innerHTML = '';
     
+    
     // Buscar produtos em destaque do Firestore
     db.collection('products')
       .where('featured', '==', true)

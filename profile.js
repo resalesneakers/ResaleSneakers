@@ -2,6 +2,7 @@
 import { auth, db, storage } from './firebase.js';
 
 document.addEventListener('DOMContentLoaded', function() {
+    
     // Verificar se o utilizador está autenticado
     auth.onAuthStateChanged(async (user) => {
         if (user) {

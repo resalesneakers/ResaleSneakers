@@ -8,6 +8,7 @@ import { getAuth,
 } from 'firebase/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
+
 // Configuração do Firebase (substitua com suas credenciais)
 const firebaseConfig = {
     apiKey: "AIzaSyCsRg3FzdM1ZB17iuaSuuvbl9fsaiMzJhY",

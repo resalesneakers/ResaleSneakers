@@ -645,6 +645,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         return;
                     }
                     
+                    
                     const selectedProduct = userProducts.find(p => p.id === selectedProductId);
                     if (!selectedProduct) {
                         alert("Erro ao encontrar o produto selecionado.");
