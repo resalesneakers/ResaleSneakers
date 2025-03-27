@@ -31,6 +31,12 @@ async function listarUsuarios() {
     console.log(doc.id, " => ", doc.data());
   });
 }
+async function listarProdutos() {
+  const querySnapshot = await getDocs(collection(db, "products"));
+  querySnapshot.forEach((doc) => {
+    console.log(doc.id, " => ", doc.data());
+  });
+}
 
 // Função de registro
 export const registerUser = async (email, password, additionalInfo) => {
