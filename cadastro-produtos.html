@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro e Exibição de Produtos</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "seu-projeto.firebaseapp.com",
+            projectId: "seu-projeto",
+            storageBucket: "seu-projeto.appspot.com",
+            messagingSenderId: "seu-id",
+            appId: "seu-app-id"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Função para cadastrar produto
+        async function cadastrarProduto(event) {
+            event.preventDefault();
+            
+            const nome = document.getElementById("nome").value;
+            const preco = document.getElementById("preco").value;
+            const descricao = document.getElementById("descricao").value;
+
+            try {
+                await addDoc(collection(db, "produtos"), {
+                    nome,
+                    preco,
+                    descricao,
+                    timestamp: new Date()
+                });
+
+                alert("Produto cadastrado com sucesso!");
+                document.getElementById("formProduto").reset();
+                exibirProdutos();
+            } catch (error) {
+                console.error("Erro ao cadastrar produto:", error);
+            }
+        }
+
+        // Função para exibir produtos cadastrados
+        async function exibirProdutos() {
+            const listaProdutos = document.getElementById("listaProdutos");
+            listaProdutos.innerHTML = "<p>Carregando produtos...</p>";
+
+            const querySnapshot = await getDocs(collection(db, "produtos"));
+            listaProdutos.innerHTML = "";
+
+            querySnapshot.forEach((doc) => {
+                const produto = doc.data();
+                listaProdutos.innerHTML += `
+                    <div style="border: 1px solid #ddd; padding: 10px; margin: 5px; border-radius: 5px;">
+                        <strong>Nome:</strong> ${produto.nome} <br>
+                        <strong>Preço:</strong> R$ ${produto.preco} <br>
+                        <strong>Descrição:</strong> ${produto.descricao} <br>
+                    </div>
+                `;
+            });
+
+            if (querySnapshot.empty) {
+                listaProdutos.innerHTML = "<p>Nenhum produto cadastrado.</p>";
+            }
+        }
+
+        window.onload = exibirProdutos;
+    </script>
+</head>
+<body>
+    <h2>Cadastro de Produtos</h2>
+    <form id="formProduto">
+        <label>Nome:</label>
+        <input type="text" id="nome" required><br>
+        
+        <label>Preço:</label>
+        <input type="number" id="preco" required><br>
+        
+        <label>Descrição:</label>
+        <textarea id="descricao" required></textarea><br>
+        
+        <button type="submit">Cadastrar</button>
+    </form>
+
+    <h2>Produtos Cadastrados</h2>
+    <div id="listaProdutos"></div>
+
+    <script>
+        document.getElementById("formProduto").addEventListener("submit", cadastrarProduto);
+    </script>
+</body>
+</html>

@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-pt">
-    
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - ResaleSneakers</title>
     <!-- Firebase scripts -->
-    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js"></script>
-    <script type="module" src="firebase.js"></script>
-    <script type="module" src="auth.js"></script>
+    <script type="module" src="firebase-config.js"></script>
+<script type="module" src="auth.js"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
         :root {
@@ -193,6 +191,8 @@
     </div>
     
     <script>
+        import { auth, db } from "./firebase.js";
+
         document.addEventListener('DOMContentLoaded', function() {
             const loginForm = document.getElementById('login-form');
             const errorMessage = document.getElementById('error-message');

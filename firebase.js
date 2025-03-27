@@ -1,5 +1,6 @@
 // firebase.js
 import { initializeApp } from 'firebase/app';
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getAuth, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
@@ -62,9 +63,35 @@ export const registerUser = async (email, password, additionalInfo) => {
 };
 
 // Função de login
-export const loginUser = (email, password) => {
-  return signInWithEmailAndPassword(auth, email, password);
-};
+async function login(event) {
+  event.preventDefault();
+  
+  const email = document.getElementById("email").value;
+  const senha = document.getElementById("senha").value;
+  
+  try {
+      await signInWithEmailAndPassword(auth, email, senha);
+      alert("Login realizado com sucesso!");
+      window.location.href = "home.html"; // Redireciona para a página principal
+  } catch (error) {
+      alert("Erro no login: " + error.message);
+  }
+}
+// Login com Google
+async function loginGoogle() {
+  const provider = new GoogleAuthProvider();
+  try {
+      await signInWithPopup(auth, provider);
+      alert("Login com Google realizado!");
+      window.location.href = "home.html";
+  } catch (error) {
+      console.error("Erro no login com Google: ", error);
+  }
+}
+// Adicionar evento ao botão de login
+document.getElementById("loginForm").addEventListener("submit", login);
+document.getElementById("loginGoogle").addEventListener("click", loginGoogle);
+
 
 // Função de logout
 export const logoutUser = () => {
