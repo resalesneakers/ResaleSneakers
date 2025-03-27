@@ -37,6 +37,8 @@ async function listarProdutos() {
     console.log(doc.id, " => ", doc.data());
   });
 }
+listarProdutos();
+
 
 // Função de registro
 export const registerUser = async (email, password, additionalInfo) => {
