@@ -25,6 +25,13 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+async function listarUsuarios() {
+  const querySnapshot = await getDocs(collection(db, "users"));
+  querySnapshot.forEach((doc) => {
+    console.log(doc.id, " => ", doc.data());
+  });
+}
+
 // Função de registro
 export const registerUser = async (email, password, additionalInfo) => {
   try {
