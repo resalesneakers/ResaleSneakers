@@ -1,19 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anunciar Produto - ResaleSneakers</title>
-    <!-- Firebase -->
+    
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js"></script>
-    <!-- Scripts personalizados -->
-    <script type="module" src="firebase.js"></script>
-    <script type="module" src="auth.js"></script>
-    <script type="module" src="product.js"></script>
+    </style>
     <link rel="stylesheet" href="styles.css">
     <style>
         :root {
@@ -509,7 +506,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="product-title">Título do Anúncio*</label>
-                        <input type="text" id="product-title" placeholder="Ex: Nike Air Jordan 1 Retro High" required>
+                        <input type="text" id="product-title" placeholder="Ex: Nike Air Jordan 1 Retro High" required maxlength="100">
                     </div>
                     
                     <div class="form-group">
@@ -534,7 +531,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="product-model">Modelo</label>
-                        <input type="text" id="product-model" placeholder="Ex: Air Jordan 1">
+                        <input type="text" id="product-model" placeholder="Ex: Air Jordan 1" maxlength="100">
                     </div>
                     
                     <div class="form-group">
@@ -560,7 +557,7 @@
                 
                 <div class="form-group">
                     <label for="product-description">Descrição*</label>
-                    <textarea id="product-description" placeholder="Descreva detalhes do calçado como cor, estado de conservação, detalhes de uso, embalagem, etc." required></textarea>
+                    <textarea id="product-description" placeholder="Descreva detalhes do calçado como cor, estado de conservação, detalhes de uso, embalagem, etc." required maxlength="500"></textarea>
                 </div>
             </div>
             
@@ -628,6 +625,7 @@
                         <img src="" alt="Preview">
                         <div class="remove-photo">✕</div>
                     </div>
+            <!-- Repeat for photo-box-2 to photo-box-6 --> <!-- Each with similar structure -->
                 </div>
                 
                 <div class="note">
@@ -639,7 +637,7 @@
                 <h3>Tipo de Anúncio</h3>
                 
                 <div class="option-group">
-                    <div class="option-item" data-type="sale">                    <div class="option-item" data-type="sale">
+                    <div class="option-item" data-type="sale">
                         <input type="radio" name="ad-type" id="ad-type-sale" value="sale" required>
                         <label for="ad-type-sale">Venda</label>
                     </div>
@@ -652,12 +650,12 @@
                 
                 <div class="form-group" id="price-group">
                     <label for="product-price">Preço (€)*</label>
-                    <input type="number" id="product-price" placeholder="Ex: 120" required>
+                    <input type="number" id="product-price" placeholder="Ex: 120" min="0" max="10000" step="0.01" required>
                 </div>
                 
                 <div class="form-group" id="trade-group" style="display: none;">
                     <label for="trade-description">O que você deseja em troca?*</label>
-                    <textarea id="trade-description" placeholder="Descreva o que você deseja em troca (ex: Air Force 1 tamanho 42)"></textarea>
+                    <textarea id="trade-description" placeholder="Descreva o que você deseja em troca (ex: Air Force 1 tamanho 42)" maxlength="300"></textarea>
                 </div>
             </div>
             
@@ -682,7 +680,7 @@
                 
                 <div class="form-group">
                     <label for="product-location">Cidade*</label>
-                    <input type="text" id="product-location" placeholder="Ex: Lisboa, Porto, etc." required>
+                    <input type="text" id="product-location" placeholder="Ex: Lisboa, Porto, etc." required maxlength="100">
                 </div>
             </div>
             
@@ -739,21 +737,60 @@
             </div>
         </div>
     </div>
-    
-    <script type="module">
-        import { auth, db, storage } from './firebase.js';
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
-        import { addDoc, collection } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
-        import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js";
 
-        // Verificar se o usuário está autenticado
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged, 
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+        import { 
+            getStorage, 
+            ref, 
+            uploadBytes, 
+            getDownloadURL 
+        } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js";
+
+        // Firebase configuration (replace with your actual config)
+        const firebaseConfig = {
+            // Your Firebase configuration object
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Logout functionality
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error('Erro ao fazer logout:', error);
+                    alert('Erro ao fazer logout. Tente novamente.');
+                }
+            });
+        }
+
+        // Authentication check
         onAuthStateChanged(auth, (user) => {
             if (!user) {
-                window.location.href = "login.html"; // Redirecionar para login se não estiver autenticado
+                window.location.href = "login.html";
             }
         });
 
-        // Alternar entre venda e troca
+        // Ad Type Toggle
         const adTypeSale = document.getElementById('ad-type-sale');
         const adTypeTrade = document.getElementById('ad-type-trade');
         const priceGroup = document.getElementById('price-group');
@@ -762,33 +799,40 @@
         adTypeSale.addEventListener('change', () => {
             priceGroup.style.display = 'block';
             tradeGroup.style.display = 'none';
+            document.getElementById('product-price').required = true;
+            document.getElementById('trade-description').required = false;
         });
 
         adTypeTrade.addEventListener('change', () => {
             priceGroup.style.display = 'none';
             tradeGroup.style.display = 'block';
+            document.getElementById('product-price').required = false;
+            document.getElementById('trade-description').required = true;
         });
 
-        // Upload de fotos
+        // Photo Upload Handling
         const photoBoxes = document.querySelectorAll('.photo-box');
         const photoInputs = document.querySelectorAll('.photo-input');
         const previewMainPhoto = document.getElementById('preview-main-photo');
         const previewThumbnails = document.getElementById('preview-thumbnails');
 
-        photoBoxes.forEach((box, index) => {
+        photoBoxes.forEach((box) => {
             const input = box.querySelector('.photo-input');
             const img = box.querySelector('img');
             const removeBtn = box.querySelector('.remove-photo');
 
             input.addEventListener('change', (e) => {
                 const file = e.target.files[0];
-                if (file) {
+                if (file && file.type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = (event) => {
                         img.src = event.target.result;
                         box.classList.add('has-image');
                     };
                     reader.readAsDataURL(file);
+                } else {
+                    alert('Por favor, selecione apenas arquivos de imagem.');
+                    input.value = '';
                 }
             });
 
@@ -800,11 +844,18 @@
             });
         });
 
-        // Pré-visualização do anúncio
+        // Preview Button
         const previewBtn = document.getElementById('preview-btn');
         const previewSection = document.getElementById('preview-section');
 
         previewBtn.addEventListener('click', () => {
+            // Validate form before preview
+            const form = document.getElementById('product-form');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
             const title = document.getElementById('product-title').value;
             const brand = document.getElementById('product-brand').value;
             const model = document.getElementById('product-model').value;
@@ -813,19 +864,18 @@
             const location = document.getElementById('product-location').value;
             const condition = document.querySelector('input[name="condition"]:checked').value;
             const price = document.getElementById('product-price').value;
-            const tradeDescription = document.getElementById('trade-description').value;
 
-            // Atualizar a pré-visualização
+            // Update preview
             document.getElementById('preview-product-title').textContent = title;
             document.getElementById('preview-brand').textContent = brand;
-            document.getElementById('preview-model').textContent = model;
+            document.getElementById('preview-model').textContent = model || 'Não especificado';
             document.getElementById('preview-size').textContent = size;
             document.getElementById('preview-description').textContent = description;
             document.getElementById('preview-location').textContent = location;
             document.getElementById('preview-status').textContent = condition === 'new' ? 'Novo' : 'Usado';
             document.getElementById('preview-price').textContent = adTypeSale.checked ? `€${price}` : 'Troca';
 
-            // Atualizar fotos
+            // Update photos
             const mainPhoto = photoBoxes[0].querySelector('img').src;
             previewMainPhoto.querySelector('img').src = mainPhoto;
 
@@ -843,7 +893,7 @@
             previewSection.style.display = 'block';
         });
 
-        // Enviar anúncio
+        // Product Submission
         const productForm = document.getElementById('product-form');
 
         productForm.addEventListener('submit', async (e) => {
@@ -852,6 +902,12 @@
             const user = auth.currentUser;
             if (!user) {
                 alert('Por favor, inicie sessão para publicar um anúncio.');
+                return;
+            }
+
+            // Form validation
+            if (!productForm.checkValidity()) {
+                productForm.reportValidity();
                 return;
             }
 
@@ -866,37 +922,49 @@
             const price = adType === 'sale' ? document.getElementById('product-price').value : null;
             const tradeDescription = adType === 'trade' ? document.getElementById('trade-description').value : null;
 
-            // Upload das fotos
+            // Photo upload
             const photos = [];
             for (let i = 0; i < photoInputs.length; i++) {
                 const file = photoInputs[i].files[0];
                 if (file) {
-                    const storageRef = ref(storage, `products/${user.uid}/${Date.now()}_${file.name}`);
-                    await uploadBytes(storageRef, file);
-                    const photoURL = await getDownloadURL(storageRef);
-                    photos.push(photoURL);
+                    try {
+                        const storageRef = ref(storage, `products/${user.uid}/${Date.now()}_${file.name}`);
+                        await uploadBytes(storageRef, file);
+                        const photoURL = await getDownloadURL(storageRef);
+                        photos.push(photoURL);
+                    } catch (uploadError) {
+                        console.error('Erro no upload da foto:', uploadError);
+                        alert('Erro no upload de uma das fotos. Tente novamente.');
+                        return;
+                    }
                 }
             }
 
-            // Salvar no Firestore
-            const productData = {
-                title,
-                brand,
-                model,
-                size,
-                description,
-                location,
-                condition,
-                adType,
-                price,
-                tradeDescription,
-                photos,
-                userId: user.uid,
-                createdAt: new Date(),
-            };
+            // Check if at least one photo is uploaded
+            if (photos.length === 0) {
+                alert('Por favor, adicione pelo menos uma foto do produto.');
+                return;
+            }
 
             try {
-                await addDoc(collection(db, 'products'), productData);
+                const productData = {
+                    titulo: title,
+                    marca: brand,
+                    modelo: model,
+                    tamanho: size,
+                    descricao: description,
+                    localizacao: location,
+                    condicao: condition,
+                    tipoAnuncio: adType === 'sale' ? 'Venda' : 'Troca',
+                    preco: parseFloat(price) || 0,
+                    descricaoTroca: tradeDescription,
+                    imagens: photos,
+                    usuarioId: user.uid,
+                    dataPublicacao: serverTimestamp(),
+                    disponibilidade: 'Disponível'
+                };
+
+                await addDoc(collection(db, 'produtos'), productData);
                 alert('Anúncio publicado com sucesso!');
                 window.location.href = 'profile.html';
             } catch (error) {
